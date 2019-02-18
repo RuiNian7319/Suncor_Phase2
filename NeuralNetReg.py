@@ -242,6 +242,6 @@ with tf.Session() as sess:
     plt.show()
 
     # Pickle normalization
-    pickle_out = open('normalization/norm.pickle', 'wb')
+    pickle_out = open('normalization/norm_nn.pickle', 'wb')
     pickle.dump(min_max_normalization, pickle_out)
     pickle_out.close()
