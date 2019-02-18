@@ -144,7 +144,7 @@ l3 = tf.layers.batch_normalization(l3, training=is_train)
 output = tf.add(tf.matmul(l3, output_layer['weights']), output_layer['biases'])
 
 # L2 Regularization
-lambd = 0.005
+lambd = 0.000
 trainable_vars = tf.trainable_variables()
 lossL2 = tf.add_n([tf.nn.l2_loss(v) for v in trainable_vars if 'bias' not in v.name]) * lambd
 
@@ -157,7 +157,7 @@ with tf.control_dependencies(update_ops):
 
 init = tf.global_variables_initializer()
 
-epochs = 5
+epochs = 25
 loss_history = []
 
 saver = tf.train.Saver()
@@ -178,7 +178,7 @@ with tf.Session() as sess:
                 current_loss = sess.run(loss, feed_dict={X: batch_X, y: batch_y, is_train: training})
                 loss_history.append(current_loss)
 
-                if i % 50 == 0:
+                if i % 550 == 0:
 
                     """
                     Train data
@@ -193,7 +193,7 @@ with tf.Session() as sess:
                     actual_labels = np.multiply(train_y, min_max_normalization.denominator[0, 0])
                     actual_labels = actual_labels + min_max_normalization.col_min[0, 0]
 
-                    train_loss = np.sqrt(np.mean(np.square(np.subtract(actual_labels, train_pred))))
+                    train_loss = np.sqrt(np.median(np.square(np.subtract(actual_labels, train_pred))))
 
                     """
                     Test data
@@ -208,7 +208,7 @@ with tf.Session() as sess:
                     actual_labels = np.multiply(test_y, min_max_normalization.denominator[0, 0])
                     actual_labels = actual_labels + min_max_normalization.col_min[0, 0]
 
-                    test_loss = np.sqrt(np.mean(np.square(np.subtract(actual_labels, test_pred))))
+                    test_loss = np.sqrt(np.median(np.square(np.subtract(actual_labels, test_pred))))
 
                     print('Epoch: {} | Loss: {:2f} | Train Error: {:2f} | Test Error: {:2f}'.format(epoch,
                                                                                                     current_loss,
@@ -234,6 +234,6 @@ with tf.Session() as sess:
     print(test_loss)
 
     # Visualization of what it looks like
-    plt.plot(test_y[0:50], color='grey')
-    plt.plot(predictions[0:50], color='green')
+    plt.plot(test_y[50:100], color='grey')
+    plt.plot(predictions[50:100], color='green')
     plt.show()
