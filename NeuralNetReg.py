@@ -106,7 +106,7 @@ X = tf.placeholder(dtype=tf.float32, shape=[None, input_size])
 y = tf.placeholder(dtype=tf.float32, shape=[None, output_size])
 
 # Batch normalization
-training = False
+training = True
 is_train = tf.placeholder(dtype=tf.bool, name='is_train')
 
 hidden_layer_1 = {'weights': tf.get_variable('h1_weights', shape=[input_size, h1_nodes],
@@ -179,7 +179,41 @@ with tf.Session() as sess:
                 loss_history.append(current_loss)
 
                 if i % 50 == 0:
-                    print('Epoch: {} | Loss: {}'.format(epoch, current_loss))
+
+                    """
+                    Train data
+                    """
+
+                    train_pred = sess.run(output, feed_dict={X: train_X, y: train_y, is_train: training})
+
+                    # Unnormalize data
+                    train_pred = np.multiply(train_pred, min_max_normalization.denominator[0, 0])
+                    train_pred = train_pred + min_max_normalization.col_min[0, 0]
+
+                    actual_labels = np.multiply(train_y, min_max_normalization.denominator[0, 0])
+                    actual_labels = actual_labels + min_max_normalization.col_min[0, 0]
+
+                    train_loss = np.sqrt(np.mean(np.square(np.subtract(actual_labels, train_pred))))
+
+                    """
+                    Test data
+                    """
+
+                    test_pred = sess.run(output, feed_dict={X: test_X, y: test_y, is_train: training})
+
+                    # Unnormalize data
+                    test_pred = np.multiply(test_pred, min_max_normalization.denominator[0, 0])
+                    test_pred = test_pred + min_max_normalization.col_min[0, 0]
+
+                    actual_labels = np.multiply(test_y, min_max_normalization.denominator[0, 0])
+                    actual_labels = actual_labels + min_max_normalization.col_min[0, 0]
+
+                    test_loss = np.sqrt(np.mean(np.square(np.subtract(actual_labels, test_pred))))
+
+                    print('Epoch: {} | Loss: {:2f} | Train Error: {:2f} | Test Error: {:2f}'.format(epoch,
+                                                                                                    current_loss,
+                                                                                                    train_loss,
+                                                                                                    test_loss))
 
     else:
         saver.restore(sess, 'checkpoints/pipeline_model.ckpt')
