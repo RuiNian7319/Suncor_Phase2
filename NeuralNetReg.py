@@ -106,7 +106,7 @@ X = tf.placeholder(dtype=tf.float32, shape=[None, input_size])
 y = tf.placeholder(dtype=tf.float32, shape=[None, output_size])
 
 # Batch normalization
-training = True
+training = False
 is_train = tf.placeholder(dtype=tf.bool, name='is_train')
 
 hidden_layer_1 = {'weights': tf.get_variable('h1_weights', shape=[input_size, h1_nodes],
@@ -234,6 +234,14 @@ with tf.Session() as sess:
     print(test_loss)
 
     # Visualization of what it looks like
-    plt.plot(test_y[50:100], color='grey')
-    plt.plot(predictions[50:100], color='green')
+    plt.plot(test_y[100:150], color='grey')
+    plt.plot(predictions[100:150], color='green')
+
+    plt.xlabel('Samples')
+    plt.ylabel('Flow rate, bbl/h')
     plt.show()
+
+    # Pickle normalization
+    pickle_out = open('normalization/norm.pickle', 'wb')
+    pickle.dump(min_max_normalization, pickle_out)
+    pickle_out.close()
