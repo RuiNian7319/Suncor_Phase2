@@ -11,8 +11,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
+# Load data
 path = '/Users/ruinian/Documents/Willowglen/data/'
-
 raw_data = pd.read_csv(path + 'flow_nn_data.csv')
 
 # Power calculation. (Current * Assumed 1500 voltage * 0.11 dollars per kWh)
@@ -21,4 +21,10 @@ raw_data['power_cost'] = np.sum(raw_data.iloc[:, 5:], axis=1) * 1500 * 0.00011
 # Assume DRA is 0.1 dollars per ppm for both LP and EP. (Based on estimate of $5M per year since power costs ~17M)
 raw_data['dra_cost'] = np.sum(raw_data.iloc[:, 1:5], axis=1) * 0.25
 
-# raw_data = raw_data.values
+# Load normalizer
+pickle_in = open('normalization/norm_ls', 'rb')
+min_max_normalization = pickle.load(pickle_in)
+
+# Weights
+weights = [0.09044828,  0.37853152, -0.12724167,  0.77938545,  0.4151537, 0.07963389]
+bias = [0.28466737]

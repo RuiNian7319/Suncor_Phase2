@@ -22,6 +22,8 @@ import os
 
 from sklearn.model_selection import train_test_split
 
+import pickle
+
 import warnings
 warnings.filterwarnings('ignore')
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'
@@ -106,9 +108,6 @@ raw_data = pd.read_csv(Args['data'])
 raw_data = raw_data.values
 print("Raw data has {} features with {} examples.".format(raw_data.shape[1], raw_data.shape[0]))
 
-min_max_normalization = MinMaxNormalization(raw_data)
-raw_data = min_max_normalization(raw_data)
-
 train_X, test_X, train_y, test_y = train_test_split(raw_data[:, 1:], raw_data[:, 0],
                                                     test_size=0.05, random_state=42, shuffle=True)
 
@@ -117,6 +116,17 @@ test_X = test_X.reshape(-1, 6)
 
 train_y = train_y.reshape(-1, 1)
 test_y = test_y.reshape(-1, 1)
+
+# Normalization
+min_max_normalization = MinMaxNormalization(np.concatenate([train_y, train_X], axis=1))
+training_data = min_max_normalization(np.concatenate([train_y, train_X], axis=1))
+testing_data = min_max_normalization(np.concatenate([test_y, test_X], axis=1))
+
+train_X = training_data[:, 1:].reshape(-1, 6)
+test_X = testing_data[:, 1:].reshape(-1, 6)
+
+train_y = training_data[:, 0].reshape(-1, 1)
+test_y = testing_data[:, 0].reshape(-1, 1)
 
 # Neural network parameters
 input_size = train_X.shape[1]
@@ -187,23 +197,56 @@ with tf.Session() as sess:
 
             loss_history.append(current_loss)
 
-            if i % 100 == 0:
+            if i % 550 == 0:
 
                 # Add to summary writer
                 summary_writer.add_summary(summary, i)
 
-                print("Epoch: {} | loss: {:5f}".format(epoch + 1, current_loss))
+                """
+                Train data
+                """
+
+                train_pred = sess.run(z, feed_dict={x: train_X, y: train_y})
+
+                # Unnormalize data
+                train_pred = np.multiply(train_pred, min_max_normalization.denominator[0, 0])
+                train_pred = train_pred + min_max_normalization.col_min[0, 0]
+
+                actual_labels = np.multiply(train_y, min_max_normalization.denominator[0, 0])
+                actual_labels = actual_labels + min_max_normalization.col_min[0, 0]
+
+                train_loss = np.sqrt(np.median(np.square(np.subtract(actual_labels, train_pred))))
+
+                """
+                Test data
+                """
+
+                test_pred = sess.run(z, feed_dict={x: test_X, y: test_y})
+
+                # Unnormalize data
+                test_pred = np.multiply(test_pred, min_max_normalization.denominator[0, 0])
+                test_pred = test_pred + min_max_normalization.col_min[0, 0]
+
+                actual_labels = np.multiply(test_y, min_max_normalization.denominator[0, 0])
+                actual_labels = actual_labels + min_max_normalization.col_min[0, 0]
+
+                test_loss = np.sqrt(np.median(np.square(np.subtract(actual_labels, test_pred))))
+
+                print('Epoch: {} | Loss: {:2f} | Train Error: {:2f} | Test Error: {:2f}'.format(epoch,
+                                                                                                current_loss,
+                                                                                                train_loss,
+                                                                                                test_loss))
 
     if Args['save_graph']:
         save_path = saver.save(sess, Args["model_path"])
         print("Model was saved in {}".format(save_path))
 
     # Output weights and biases
-    weights = sess.run(W).reshape(train_X.shape[1], 1)
+    weights = sess.run(W)
     biases = sess.run(b)
 
     # Predictions
-    predictions = sess.run(output, feed_dict={X: test_X, y: test_y, is_train: training})
+    predictions = sess.run(z, feed_dict={x: test_X})
 
     # Unnormalize data
     predictions = np.multiply(predictions, min_max_normalization.denominator[0, 0])
@@ -225,6 +268,6 @@ with tf.Session() as sess:
     plt.show()
 
     # Pickle normalization
-    pickle_out = open('normalization/norm_nn.pickle', 'wb')
+    pickle_out = open('normalization/norm_ls.pickle', 'wb')
     pickle.dump(min_max_normalization, pickle_out)
     pickle_out.close()
