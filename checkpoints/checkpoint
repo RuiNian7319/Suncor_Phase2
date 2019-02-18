@@ -1,0 +1,2 @@
+model_checkpoint_path: "pipeline_model.ckpt"
+all_model_checkpoint_paths: "pipeline_model.ckpt"
