@@ -37,11 +37,11 @@ parser = argparse.ArgumentParser(description="Inputs to the linear regression")
 path = '/Users/ruinian/Documents/Willowglen/data/'
 
 # Arguments
-parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'flow_nn_data.csv')
+parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'flow_nn_data_BoosterPump.csv')
 parser.add_argument("--train_size", help="% of whole data set used for training", default=0.95)
 parser.add_argument('--lr', help="learning rate for the logistic regression", default=0.003)
 parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=512)
-parser.add_argument("--epochs", help="Number of times data should be recycled through", default=25)
+parser.add_argument("--epochs", help="Number of times data should be recycled through", default=20)
 parser.add_argument("--tensorboard_path", help="Location of saved tensorboard information", default="./tensorboard")
 parser.add_argument("--model_path", help="Location of saved tensorflow graph", default='checkpoints/time1.ckpt')
 parser.add_argument("--save_graph", help="Save the current tensorflow computational graph", default=True)
@@ -108,7 +108,7 @@ raw_data = pd.read_csv(Args['data'])
 raw_data = raw_data.values
 print("Raw data has {} features with {} examples.".format(raw_data.shape[1], raw_data.shape[0]))
 
-train_X, test_X, train_y, test_y = train_test_split(raw_data[:, :-1], raw_data[:, -1],
+train_X, test_X, train_y, test_y = train_test_split(raw_data[:, 1:], raw_data[:, 0],
                                                     test_size=0.05, random_state=42, shuffle=True)
 
 train_X = train_X.reshape(-1, 7)

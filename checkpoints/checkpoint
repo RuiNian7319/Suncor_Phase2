@@ -1,2 +1,2 @@
-model_checkpoint_path: "pipeline_model.ckpt"
-all_model_checkpoint_paths: "pipeline_model.ckpt"
+model_checkpoint_path: "time1.ckpt"
+all_model_checkpoint_paths: "time1.ckpt"
