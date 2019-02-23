@@ -3,7 +3,7 @@ Linear Regression Patch 1.0
 
 Patch notes:  Added tensorboard, saver
 
-Date of last edit: February 18th
+Date of last edit: February 25th
 Rui Nian
 
 Current issues: Output size is hard coded
@@ -37,7 +37,7 @@ parser = argparse.ArgumentParser(description="Inputs to the linear regression")
 path = '/Users/ruinian/Documents/Willowglen/data/'
 
 # Arguments
-parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'flow_nn_data_BoosterPump.csv')
+parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'CIG_Pressure_Data.csv')
 parser.add_argument("--train_size", help="% of whole data set used for training", default=0.95)
 parser.add_argument('--lr', help="learning rate for the logistic regression", default=0.003)
 parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=512)
@@ -111,8 +111,8 @@ print("Raw data has {} features with {} examples.".format(raw_data.shape[1], raw
 train_X, test_X, train_y, test_y = train_test_split(raw_data[:, 1:], raw_data[:, 0],
                                                     test_size=0.05, random_state=42, shuffle=True)
 
-train_X = train_X.reshape(-1, 7)
-test_X = test_X.reshape(-1, 7)
+train_X = train_X.reshape(-1, 5)
+test_X = test_X.reshape(-1, 5)
 
 train_y = train_y.reshape(-1, 1)
 test_y = test_y.reshape(-1, 1)
@@ -122,8 +122,8 @@ min_max_normalization = MinMaxNormalization(np.concatenate([train_y, train_X], a
 training_data = min_max_normalization(np.concatenate([train_y, train_X], axis=1))
 testing_data = min_max_normalization(np.concatenate([test_y, test_X], axis=1))
 
-train_X = training_data[:, 1:].reshape(-1, 7)
-test_X = testing_data[:, 1:].reshape(-1, 7)
+train_X = training_data[:, 1:].reshape(-1, 5)
+test_X = testing_data[:, 1:].reshape(-1, 5)
 
 train_y = training_data[:, 0].reshape(-1, 1)
 test_y = testing_data[:, 0].reshape(-1, 1)
@@ -261,7 +261,7 @@ with tf.Session() as sess:
     plt.plot(predictions[100:150], color='green')
 
     plt.xlabel('Samples')
-    plt.ylabel('Flow rate, bbl/h')
+    plt.ylabel('Pressure, psi')
     plt.show()
 
     # Pickle normalization

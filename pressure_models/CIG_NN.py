@@ -76,14 +76,14 @@ class MinMaxNormalization:
 path = '/Users/ruinian/Documents/Willowglen/data/'
 # path = '/home/rui/Documents/logistic_regression_tf/'
 
-raw_data = pd.read_csv(path + 'flow_nn_data.csv')
+raw_data = pd.read_csv(path + 'CIG_Pressure_Data.csv')
 raw_data = raw_data.values
 
 train_X, test_X, train_y, test_y = train_test_split(raw_data[:, :-1], raw_data[:, -1],
                                                     test_size=0.05, random_state=42, shuffle=True)
 
-train_X = train_X.reshape(-1, 7)
-test_X = test_X.reshape(-1, 7)
+train_X = train_X.reshape(-1, 5)
+test_X = test_X.reshape(-1, 5)
 
 train_y = train_y.reshape(-1, 1)
 test_y = test_y.reshape(-1, 1)
@@ -93,8 +93,8 @@ min_max_normalization = MinMaxNormalization(np.concatenate([train_y, train_X], a
 training_data = min_max_normalization(np.concatenate([train_y, train_X], axis=1))
 testing_data = min_max_normalization(np.concatenate([test_y, test_X], axis=1))
 
-train_X = training_data[:, 1:].reshape(-1, 7)
-test_X = testing_data[:, 1:].reshape(-1, 7)
+train_X = training_data[:, 1:].reshape(-1, 5)
+test_X = testing_data[:, 1:].reshape(-1, 5)
 
 train_y = training_data[:, 0].reshape(-1, 1)
 test_y = testing_data[:, 0].reshape(-1, 1)
@@ -244,7 +244,7 @@ with tf.Session() as sess:
     plt.plot(predictions[100:150], color='green')
 
     plt.xlabel('Samples')
-    plt.ylabel('Flow rate, bbl/h')
+    plt.ylabel('Pressure, psi')
     plt.show()
 
     # Pickle normalization
