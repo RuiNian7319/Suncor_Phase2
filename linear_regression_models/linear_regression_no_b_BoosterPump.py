@@ -28,6 +28,8 @@ import warnings
 warnings.filterwarnings('ignore')
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'
 
+gc.enable()
+
 """
 Parsing section, to define parameters to be ran in the code
 """
@@ -117,7 +119,7 @@ test_X = test_X.reshape(-1, 7)
 train_y = train_y.reshape(-1, 1)
 test_y = test_y.reshape(-1, 1)
 
-# Normalization
+# Normalization.  Recombine to normalize at once, then split them into their train/test forms
 min_max_normalization = MinMaxNormalization(np.concatenate([train_y, train_X], axis=1))
 training_data = min_max_normalization(np.concatenate([train_y, train_X], axis=1))
 testing_data = min_max_normalization(np.concatenate([test_y, test_X], axis=1))
