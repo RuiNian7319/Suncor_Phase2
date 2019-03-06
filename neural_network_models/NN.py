@@ -73,13 +73,18 @@ class MinMaxNormalization:
 
 
 # Load data
-path = '/Users/ruinian/Documents/Willowglen/data/'
-# path = '/home/rui/Documents/logistic_regression_tf/'
+# path = '/Users/ruinian/Documents/Willowglen/data/'
+path = '/home/rui/Documents/Willowglen/data/Optimization_Data'
 
-raw_data = pd.read_csv(path + 'flow_nn_data.csv')
+raw_data = pd.read_csv(path + 'flow_nn_data_BoosterPump.csv')
 raw_data = raw_data.values
 
-train_X, test_X, train_y, test_y = train_test_split(raw_data[:, :-1], raw_data[:, -1],
+min_max_normalization = MinMaxNormalization(raw_data)
+raw_data = min_max_normalization(raw_data)
+
+assert(not np.isnan(raw_data).any())
+
+train_X, test_X, train_y, test_y = train_test_split(raw_data[:, 1:], raw_data[:, 0],
                                                     test_size=0.05, random_state=42, shuffle=True)
 
 train_X = train_X.reshape(-1, 7)
@@ -87,17 +92,6 @@ test_X = test_X.reshape(-1, 7)
 
 train_y = train_y.reshape(-1, 1)
 test_y = test_y.reshape(-1, 1)
-
-# Normalization
-min_max_normalization = MinMaxNormalization(np.concatenate([train_y, train_X], axis=1))
-training_data = min_max_normalization(np.concatenate([train_y, train_X], axis=1))
-testing_data = min_max_normalization(np.concatenate([test_y, test_X], axis=1))
-
-train_X = training_data[:, 1:].reshape(-1, 7)
-test_X = testing_data[:, 1:].reshape(-1, 7)
-
-train_y = training_data[:, 0].reshape(-1, 1)
-test_y = testing_data[:, 0].reshape(-1, 1)
 
 input_size = train_X.shape[1]
 h1_nodes = 30
