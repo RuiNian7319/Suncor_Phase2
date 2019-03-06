@@ -74,7 +74,7 @@ class MinMaxNormalization:
 
 # Load data
 # path = '/Users/ruinian/Documents/Willowglen/data/'
-path = '/home/rui/Documents/Willowglen/data/Optimization_Data'
+path = '/home/rui/Documents/Willowglen/data/Optimization_Data/'
 
 raw_data = pd.read_csv(path + 'flow_nn_data_BoosterPump.csv')
 raw_data = raw_data.values
