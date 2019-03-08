@@ -163,7 +163,7 @@ with tf.name_scope("Model"):
     tf.summary.histogram("Weights", W)
 
 # Model
-z = tf.matmul(x, W)
+z = tf.matmul(x, W) + tf.matmul(tf.square(x), W)
 
 # Cross entropy with logits, assumes inputs are logits before cross entropy
 loss = tf.reduce_mean(tf.losses.mean_squared_error(labels=y, predictions=z))

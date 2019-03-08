@@ -22,18 +22,11 @@ import os
 
 from sklearn.model_selection import train_test_split
 
-import seaborn as sns
-
 import pickle
 
 import warnings
 warnings.filterwarnings('ignore')
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'
-
-sns.set()
-sns.set_style('white')
-
-gc.enable()
 
 """
 Parsing section, to define parameters to be ran in the code
@@ -41,19 +34,16 @@ Parsing section, to define parameters to be ran in the code
 
 # Initiate the parser
 parser = argparse.ArgumentParser(description="Inputs to the linear regression")
-
-# MacOS & Ubuntu 18.04 path
-# path = '/Users/ruinian/Documents/Willowglen/data/'
-path = '/home/rui/Documents/Willowglen/data/Optimization_Data/'
+path = '/Users/ruinian/Documents/Willowglen/data/'
 
 # Arguments
-parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Opti_withAllChangable.csv')
+parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'flow_nn_data.csv')
 parser.add_argument("--train_size", help="% of whole data set used for training", default=0.95)
 parser.add_argument('--lr', help="learning rate for the logistic regression", default=0.003)
 parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=512)
-parser.add_argument("--epochs", help="Number of times data should be recycled through", default=20)
+parser.add_argument("--epochs", help="Number of times data should be recycled through", default=5)
 parser.add_argument("--tensorboard_path", help="Location of saved tensorboard information", default="./tensorboard")
-parser.add_argument("--model_path", help="Location of saved tensorflow graph", default='checkpoints/ls_withAllPressure.ckpt')
+parser.add_argument("--model_path", help="Location of saved tensorflow graph", default='checkpoints/time1.ckpt')
 parser.add_argument("--save_graph", help="Save the current tensorflow computational graph", default=True)
 parser.add_argument("--restore_graph", help="Reload model parameters from saved location", default=False)
 
@@ -118,22 +108,22 @@ raw_data = pd.read_csv(Args['data'])
 raw_data = raw_data.values
 print("Raw data has {} features with {} examples.".format(raw_data.shape[1], raw_data.shape[0]))
 
-train_X, test_X, train_y, test_y = train_test_split(raw_data[:, :-1], raw_data[:, -1],
+train_X, test_X, train_y, test_y = train_test_split(raw_data[:, 1:], raw_data[:, 0],
                                                     test_size=0.05, random_state=42, shuffle=True)
 
-train_X = train_X.reshape(-1, raw_data.shape[1] - 1)
-test_X = test_X.reshape(-1, raw_data.shape[1] - 1)
+train_X = train_X.reshape(-1, 6)
+test_X = test_X.reshape(-1, 6)
 
 train_y = train_y.reshape(-1, 1)
 test_y = test_y.reshape(-1, 1)
 
-# Normalization.  Recombine to normalize at once, then split them into their train/test forms
+# Normalization
 min_max_normalization = MinMaxNormalization(np.concatenate([train_y, train_X], axis=1))
 training_data = min_max_normalization(np.concatenate([train_y, train_X], axis=1))
 testing_data = min_max_normalization(np.concatenate([test_y, test_X], axis=1))
 
-train_X = training_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
-test_X = testing_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
+train_X = training_data[:, 1:].reshape(-1, 6)
+test_X = testing_data[:, 1:].reshape(-1, 6)
 
 train_y = training_data[:, 0].reshape(-1, 1)
 test_y = testing_data[:, 0].reshape(-1, 1)
@@ -159,11 +149,14 @@ with tf.name_scope("Inputs"):
 with tf.name_scope("Model"):
     with tf.variable_scope("Weights"):
         W = tf.get_variable('Weights', shape=[input_size, 1], initializer=tf.contrib.layers.xavier_initializer())
+    with tf.variable_scope("Biases"):
+        b = tf.get_variable('Biases', shape=[output_size], initializer=tf.contrib.layers.xavier_initializer())
 
     tf.summary.histogram("Weights", W)
+    tf.summary.histogram("Bias", b)
 
 # Model
-z = tf.matmul(x, W)
+z = tf.matmul(x, tf.square(W)) + b
 
 # Cross entropy with logits, assumes inputs are logits before cross entropy
 loss = tf.reduce_mean(tf.losses.mean_squared_error(labels=y, predictions=z))
@@ -204,7 +197,6 @@ with tf.Session() as sess:
 
             loss_history.append(current_loss)
 
-            # Evaluate losses
             if i % 550 == 0:
 
                 # Add to summary writer
@@ -223,7 +215,7 @@ with tf.Session() as sess:
                 actual_labels = np.multiply(train_y, min_max_normalization.denominator[0, 0])
                 actual_labels = actual_labels + min_max_normalization.col_min[0, 0]
 
-                train_loss = np.sqrt(np.mean(np.square(np.subtract(actual_labels, train_pred))))
+                train_loss = np.sqrt(np.median(np.square(np.subtract(actual_labels, train_pred))))
 
                 """
                 Test data
@@ -238,7 +230,7 @@ with tf.Session() as sess:
                 actual_labels = np.multiply(test_y, min_max_normalization.denominator[0, 0])
                 actual_labels = actual_labels + min_max_normalization.col_min[0, 0]
 
-                test_loss = np.sqrt(np.mean(np.square(np.subtract(actual_labels, test_pred))))
+                test_loss = np.sqrt(np.median(np.square(np.subtract(actual_labels, test_pred))))
 
                 print('Epoch: {} | Loss: {:2f} | Train Error: {:2f} | Test Error: {:2f}'.format(epoch,
                                                                                                 current_loss,
@@ -249,9 +241,9 @@ with tf.Session() as sess:
         save_path = saver.save(sess, Args["model_path"])
         print("Model was saved in {}".format(save_path))
 
-    # Output weights
-
+    # Output weights and biases
     weights = sess.run(W)
+    biases = sess.run(b)
 
     # Predictions
     predictions = sess.run(z, feed_dict={x: test_X})
@@ -263,31 +255,19 @@ with tf.Session() as sess:
     test_y = np.multiply(test_y, min_max_normalization.denominator[0, 0])
     test_y = test_y + min_max_normalization.col_min[0, 0]
 
-    # RMSE & MAE Calc
-    RMSE_loss = np.sqrt(np.mean(np.square(np.subtract(test_y, predictions))))
-    MAE_loss = np.mean(np.abs(np.subtract(test_y, predictions)))
-
-    print('RMSE: {} | MAE: {}'.format(RMSE_loss, MAE_loss))
+    # MSE Calc
+    test_loss = np.sqrt(np.mean(np.square(np.subtract(test_y, predictions))))
+    print(test_loss)
 
     # Visualization of what it looks like
-    stdErr = np.std(np.abs(np.subtract(test_y, predictions)))
-
-    group1 = np.concatenate([np.linspace(0, 49, 50).reshape(-1, 1), predictions[100:150]], axis=1)
-    group2 = np.concatenate([np.linspace(0, 49, 50).reshape(-1, 1), predictions[100:150] + stdErr], axis=1)
-    group3 = np.concatenate([np.linspace(0, 49, 50).reshape(-1, 1), predictions[100:150] - stdErr], axis=1)
-
-    group = np.concatenate([group1, group2, group3])
-
-    df = pd.DataFrame(group, columns=['time', 'predictions'])
-
-    sns.lineplot(x='time', y='predictions', data=df)
-    plt.plot(test_y[100:150])
+    plt.plot(test_y[100:150], color='grey')
+    plt.plot(predictions[100:150], color='green')
 
     plt.xlabel('Samples')
     plt.ylabel('Flow rate, bbl/h')
     plt.show()
 
     # Pickle normalization
-    pickle_out = open('normalization/ls.pickle', 'wb')
+    pickle_out = open('normalization/norm_ls.pickle', 'wb')
     pickle.dump(min_max_normalization, pickle_out)
     pickle_out.close()

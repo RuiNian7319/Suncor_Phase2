@@ -20,6 +20,7 @@ import pickle
 
 from sklearn.model_selection import train_test_split
 
+import seaborn as sns
 import gc
 
 from copy import deepcopy
@@ -27,6 +28,10 @@ from copy import deepcopy
 import warnings
 import os
 
+sns.set()
+sns.set_style('white')
+
+gc.enable()
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 seed = 1
@@ -76,7 +81,7 @@ class MinMaxNormalization:
 # path = '/Users/ruinian/Documents/Willowglen/data/'
 path = '/home/rui/Documents/Willowglen/data/Optimization_Data/'
 
-raw_data = pd.read_csv(path + 'Opti_withAllPressure.csv')
+raw_data = pd.read_csv(path + 'Opti_withAllChangable.csv')
 
 # Turn Pandas dataframe into NumPy Array
 raw_data = raw_data.values
@@ -245,8 +250,18 @@ with tf.Session() as sess:
     print('RMSE: {} | MAE: {}'.format(RMSE_loss, MAE_loss))
 
     # Visualization of what it looks like
-    plt.plot(test_y[100:150], color='grey')
-    plt.plot(predictions[100:150], color='green')
+    stdErr = np.std(np.abs(np.subtract(test_y, predictions)))
+
+    group1 = np.concatenate([np.linspace(0, 49, 50).reshape(-1, 1), predictions[100:150]], axis=1)
+    group2 = np.concatenate([np.linspace(0, 49, 50).reshape(-1, 1), predictions[100:150] + stdErr], axis=1)
+    group3 = np.concatenate([np.linspace(0, 49, 50).reshape(-1, 1), predictions[100:150] - stdErr], axis=1)
+
+    group = np.concatenate([group1, group2, group3])
+
+    df = pd.DataFrame(group, columns=['time', 'predictions'])
+
+    sns.lineplot(x='time', y='predictions', data=df)
+    plt.plot(test_y[100:150])
 
     plt.xlabel('Samples')
     plt.ylabel('Flow rate, bbl/h')

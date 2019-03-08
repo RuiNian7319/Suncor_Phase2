@@ -20,7 +20,7 @@ Linear Regression with all pressure (Opti_withAllPressure):
 RMSE: 101
 MAE: 71
 
-Adding Ault pumps & not filtering when Ault booster pumps are not on.
+Adding Ault pumps & not filtering when Cheyenne booster pumps are not on.
 
 
 Linear Regression with all pressure (Opti_withAllPressure):
@@ -31,4 +31,14 @@ Neural Network with all pressure (Opti_withAllPressure):
 RMSE: 49
 MAE: 33
 
-### March 6th
+### March 7th
+Add seaborn variance plot
+Optimization: PPM is more expensive to raise given the desired flow rate
+
+Linear Regression with all pressure (Opti_withAllChangable):
+RMSE: 135
+MAE: 92
+
+Linear Regression with all pressure (Opti_withAllChangable):
+RMSE: 96
+MAE: 65
