@@ -78,10 +78,10 @@ class MinMaxNormalization:
 
 
 # Load data
-# path = '/Users/ruinian/Documents/Willowglen/data/'
-path = '/home/rui/Documents/Willowglen/data/Optimization_Data/'
+path = '/Users/ruinian/Documents/Willowglen/data/Optimization_Data/'
+# path = '/home/rui/Documents/Willowglen/data/Optimization_Data/'
 
-raw_data = pd.read_csv(path + 'Opti_withAllChangable.csv')
+raw_data = pd.read_csv(path + 'Opti_withAllChangableDen.csv')
 
 # Turn Pandas dataframe into NumPy Array
 raw_data = raw_data.values

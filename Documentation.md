@@ -37,29 +37,45 @@ MAE: 33
 Add seaborn variance plot
 Optimization: PPM is more expensive to raise given the desired flow rate
 
-Linear Regression with all pressure (Opti_withAllChangable):
+Linear Regression (Opti_withAllChangable):
 RMSE: 135
 MAE: 92
 
-Neural Network with all pressure (Opti_withAllChangable):
+Neural Network (Opti_withAllChangable):
 RMSE: 96
 MAE: 65
 
-Quadratic Model with all pressure (Opti_withAllChangable) - Incorrect data probably:
+Quadratic Model (Opti_withAllChangable) - Incorrect data probably:
 RMSE: 145
 MAE: 100
 
 ### March 8th
 Added Fort Lupton ON/OFF pump
 
-Linear Regression with all pressure (Opti_withAllChangable):
+Linear Regression (Opti_withAllChangable):
 RMSE: 135
 MAE: 92
 
-Neural Network with all pressure (Opti_withAllChangable):
+Neural Network (Opti_withAllChangable):
 RMSE: 96
 MAE: 66
 
-Linear Regression with all pressure (Opti_withAllChangableDen):
+Linear Regression (Opti_withAllChangableDen):
 RMSE: 131
 MAE: 90
+
+Fort Lupton pump didn't add much..
+
+### March 9th
+Added density filtering
+
+Linear Regression (Opti_withAllChangableDen):
+RMSE: 124
+MAE: 84
+
+Neural Network (Opti_withAllChangableDen):
+RMSE: 87
+MAE: 60
+
+Sorted validation plots without randomizing.
+Error can be very high, random spikes in the plot.
