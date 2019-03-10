@@ -12,6 +12,7 @@ Opti_withAllChangable: Includes only changable data
 
 Opti_withAllChangableDen: Includes only changable data and density at Cheyenne, CIG, Ault
 
+Opti_withAllChangableDenNoFL: Above without discharge pressure at FL
 
 
 # Updates
@@ -79,3 +80,24 @@ MAE: 60
 
 Sorted validation plots without randomizing.
 Error can be very high, random spikes in the plot.
+
+The VFD at Fort Lupton is messing with results.
+
+### March 10th
+Remove discharge pressure at Fort Lupton to remove spikes.
+
+Linear Regression (Opti_withAllChangableDenNoFL):
+RMSE: 207
+MAE: ~140
+
+Neural Network (Opti_withAllChangableDenNoFL):
+RMSE: 140
+MAE: 103
+
+Building quadratic model
+
+Quadratic model (Opti_withAllChangableDenNoFL):
+RMSE`: 200
+MAE:  ~135
+
+Build sqrt model

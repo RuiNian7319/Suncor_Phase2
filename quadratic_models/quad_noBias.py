@@ -47,7 +47,7 @@ path = '/Users/ruinian/Documents/Willowglen/data/Optimization_Data/'
 # path = '/home/rui/Documents/Willowglen/data/Optimization_Data/'
 
 # Arguments
-parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Opti_withAllChangableDen.csv')
+parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Opti_withAllChangableDenNoFL.csv')
 parser.add_argument("--train_size", help="% of whole data set used for training", default=0.95)
 parser.add_argument('--lr', help="learning rate for the logistic regression", default=0.003)
 parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=512)
@@ -116,6 +116,10 @@ raw_data = pd.read_csv(Args['data'])
 
 # Turn Pandas dataframe into NumPy Array
 raw_data = raw_data.values
+
+# Square values in the first columns for quadratic models
+raw_data = np.concatenate([np.square(raw_data[:, :-1]), raw_data], axis=1)
+
 print("Raw data has {} features with {} examples.".format(raw_data.shape[1], raw_data.shape[0]))
 
 train_X, test_X, train_y, test_y = train_test_split(raw_data[:, :-1], raw_data[:, -1],
@@ -255,8 +259,8 @@ with tf.Session() as sess:
 
     # Predictions
     raw_data = min_max_normalization(raw_data)
-    end_test_X = raw_data[0:1000, :-1]
-    end_test_y = raw_data[0:1000, -1]
+    end_test_X = raw_data[50000:51000, :-1]
+    end_test_y = raw_data[50000:51000, -1]
 
     predictions = sess.run(z, feed_dict={x: end_test_X})
 
