@@ -77,17 +77,68 @@ class MinMaxNormalization:
         return data
 
 
-# Load data
-path = '/Users/ruinian/Documents/Willowglen/data/Optimization_Data/'
-# path = '/home/rui/Documents/Willowglen/data/Optimization_Data/'
+def seq_pred(session, model, data, normalizer, time_start, time_end, adv_plot=True):
+    # Normalize
+    data = normalizer(data)
+    plot_x = data[time_start:time_end, 1:]
+    plot_y = data[time_start:time_end, 0]
 
-raw_data = pd.read_csv(path + 'Opti_withAllChangableDenNoFL.csv')
+    preds = session.run(model, feed_dict={X: plot_x, is_train: False})
+
+    # Unnormalize data
+    preds = np.multiply(preds, normalizer.denominator[0, 0])
+    preds = preds + normalizer.col_min[0, 0]
+
+    plot_y = np.multiply(plot_y, normalizer.denominator[0, 0])
+    plot_y = plot_y + normalizer.col_min[0, 0]
+
+    # RMSE & MAE Calc
+    rmse_loss = np.sqrt(np.mean(np.square(np.subtract(plot_y, preds))))
+    mae_loss = np.mean(np.abs(np.subtract(plot_y, preds)))
+
+    print('RMSE: {} | MAE: {}'.format(rmse_loss, mae_loss))
+
+    if adv_plot:
+        # Visualization of what it looks like
+        stderr = np.std(np.abs(np.subtract(plot_y, preds)))
+
+        group1 = np.concatenate([np.linspace(0, time_end - time_start - 1, time_end - time_start).reshape(-1, 1),
+                                 preds[0:time_end - time_start]], axis=1)
+        group2 = np.concatenate([np.linspace(0, time_end - time_start - 1, time_end - time_start).reshape(-1, 1),
+                                 preds[0:time_end - time_start] + stderr], axis=1)
+        group3 = np.concatenate([np.linspace(0, time_end - time_start - 1, time_end - time_start).reshape(-1, 1),
+                                 preds[0:time_end - time_start] - stderr], axis=1)
+
+        group = np.concatenate([group1, group2, group3])
+
+        df = pd.DataFrame(group, columns=['time', 'predictions'])
+
+        sns.lineplot(x='time', y='predictions', data=df)
+        plt.plot(plot_y[time_start:time_end])
+
+        plt.xlabel('Samples')
+        plt.ylabel('Flow rate, bbl/h')
+        plt.show()
+    else:
+        plt.plot(preds[time_start:time_end])
+        plt.plot(plot_y[time_start:time_end])
+
+        plt.xlabel('Samples')
+        plt.ylabel('Flow rate, bbl/h')
+        plt.show()
+
+
+# Load data
+# path = '/Users/ruinian/Documents/Willowglen/data/Optimization_Data/'
+path = '/home/rui/Documents/Willowglen/data/Optimization_Data/'
+
+raw_data = pd.read_csv(path + 'Opti_withAllChangableDenCurv3.csv')
 
 # Turn Pandas dataframe into NumPy Array
 raw_data = raw_data.values
 print("Raw data has {} features with {} examples.".format(raw_data.shape[1], raw_data.shape[0]))
 
-train_X, test_X, train_y, test_y = train_test_split(raw_data[:, :-1], raw_data[:, -1],
+train_X, test_X, train_y, test_y = train_test_split(raw_data[:, 1:], raw_data[:, 0],
                                                     test_size=0.05, random_state=42, shuffle=True)
 
 train_X = train_X.reshape(-1, raw_data.shape[1] - 1)
@@ -120,7 +171,7 @@ X = tf.placeholder(dtype=tf.float32, shape=[None, input_size])
 y = tf.placeholder(dtype=tf.float32, shape=[None, output_size])
 
 # Batch normalization
-training = True
+training = False
 is_train = tf.placeholder(dtype=tf.bool, name='is_train')
 
 hidden_layer_1 = {'weights': tf.get_variable('h1_weights', shape=[input_size, h1_nodes],
@@ -249,25 +300,40 @@ with tf.Session() as sess:
 
     print('RMSE: {} | MAE: {}'.format(RMSE_loss, MAE_loss))
 
-    # Visualization of what it looks like
-    stdErr = np.std(np.abs(np.subtract(test_y, predictions)))
-
-    group1 = np.concatenate([np.linspace(0, 49, 50).reshape(-1, 1), predictions[100:150]], axis=1)
-    group2 = np.concatenate([np.linspace(0, 49, 50).reshape(-1, 1), predictions[100:150] + stdErr], axis=1)
-    group3 = np.concatenate([np.linspace(0, 49, 50).reshape(-1, 1), predictions[100:150] - stdErr], axis=1)
-
-    group = np.concatenate([group1, group2, group3])
-
-    df = pd.DataFrame(group, columns=['time', 'predictions'])
-
-    sns.lineplot(x='time', y='predictions', data=df)
-    plt.plot(test_y[100:150])
-
-    plt.xlabel('Samples')
-    plt.ylabel('Flow rate, bbl/h')
-    plt.show()
+    # Non-scrambled data plot
+    # seq_pred(sess, output, raw_data, min_max_normalization, 35000, 37000, adv_plot=False)
 
     # Pickle normalization
     pickle_out = open('normalization/norm_nn.pickle', 'wb')
     pickle.dump(min_max_normalization, pickle_out)
     pickle_out.close()
+
+    # Normalize
+    time_start = 0
+    time_end = 500
+    data = min_max_normalization(raw_data)
+    plot_x = data[time_start:time_end, 1:]
+    plot_y = data[time_start:time_end, 0]
+
+    preds = sess.run(output, feed_dict={X: plot_x, is_train: False})
+
+    # Unnormalize data
+    preds = np.multiply(preds, min_max_normalization.denominator[0, 0])
+    preds = preds + min_max_normalization.col_min[0, 0]
+
+    plot_y = np.multiply(plot_y, min_max_normalization.denominator[0, 0])
+    plot_y = plot_y + min_max_normalization.col_min[0, 0]
+
+    # RMSE & MAE Calc
+    rmse_loss = np.sqrt(np.mean(np.square(np.subtract(plot_y, preds))))
+    mae_loss = np.mean(np.abs(np.subtract(plot_y, preds)))
+
+    print('RMSE: {} | MAE: {}'.format(rmse_loss, mae_loss))
+
+    plt.plot(preds[time_start:time_end])
+    plt.plot(plot_y[time_start:time_end])
+
+    plt.xlabel('Samples')
+    plt.ylabel('Flow rate, bbl/h')
+    plt.show()
+

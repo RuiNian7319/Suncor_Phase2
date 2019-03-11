@@ -3,11 +3,9 @@ Linear Regression Patch 1.0
 
 Patch notes:  Added tensorboard, saver
 
-Date of last edit: February 18th
 Rui Nian
 
-Current issues: Output size is hard coded
-                Cannot run code purely to test the accuracy of algorithm
+Current issues:
 """
 
 import numpy as np
@@ -51,7 +49,7 @@ parser.add_argument("--data", help="Data to be loaded into the model", default=p
 parser.add_argument("--train_size", help="% of whole data set used for training", default=0.95)
 parser.add_argument('--lr', help="learning rate for the logistic regression", default=0.003)
 parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=512)
-parser.add_argument("--epochs", help="Number of times data should be recycled through", default=1)
+parser.add_argument("--epochs", help="Number of times data should be recycled through", default=25)
 parser.add_argument("--tensorboard_path", help="Location of saved tensorboard information", default="./tensorboard")
 parser.add_argument("--model_path", help="Location of saved tensorflow graph", default='checkpoints/ls_withAllPressure.ckpt')
 parser.add_argument("--save_graph", help="Save the current tensorflow computational graph", default=True)
@@ -107,13 +105,13 @@ class MinMaxNormalization:
         return data
 
 
-def seq_pred(session, model, data, normalizer, time_start, time_end, adv_plot=True):
+def seq_pred(session, data, normalizer, time_start, time_end, err_plot=True):
     # Normalize
     data = normalizer(data)
     plot_x = data[time_start:time_end, 1:]
     plot_y = data[time_start:time_end, 0]
 
-    preds = session.run(model, feed_dict={x: plot_x})
+    preds = session.run(z, feed_dict={x: plot_x})
 
     # Unnormalize data
     preds = np.multiply(preds, normalizer.denominator[0, 0])
@@ -128,7 +126,7 @@ def seq_pred(session, model, data, normalizer, time_start, time_end, adv_plot=Tr
 
     print('RMSE: {} | MAE: {}'.format(rmse_loss, mae_loss))
 
-    if adv_plot:
+    if err_plot:
         # Visualization of what it looks like
         stderr = np.std(np.abs(np.subtract(plot_y, preds)))
 
@@ -165,7 +163,7 @@ raw_data = pd.read_csv(Args['data'])
 raw_data = raw_data.values
 
 # Square values in the first columns for quadratic models
-raw_data = np.concatenate([raw_data, np.square(raw_data[:, 1:])], axis=1)
+raw_data = np.concatenate([raw_data, np.sqrt(raw_data[:, 1:])], axis=1)
 
 print("Raw data has {} features with {} examples.".format(raw_data.shape[1], raw_data.shape[0]))
 
@@ -210,11 +208,13 @@ with tf.name_scope("Inputs"):
 with tf.name_scope("Model"):
     with tf.variable_scope("Weights"):
         W = tf.get_variable('Weights', shape=[input_size, 1], initializer=tf.contrib.layers.xavier_initializer())
+        b = tf.get_variable('Bias', shape=[1, 1], initializer=tf.contrib.layers.xavier_initializer())
 
     tf.summary.histogram("Weights", W)
+    tf.summary.histogram("Bias", b)
 
 # Model
-z = tf.matmul(x, W)
+z = tf.matmul(x, W) + b
 
 # Cross entropy with logits, assumes inputs are logits before cross entropy
 loss = tf.reduce_mean(tf.losses.mean_squared_error(labels=y, predictions=z))
@@ -329,6 +329,7 @@ with tf.Session() as sess:
 
     # Output weights
     weights = sess.run(W)
+    bias = sess.run(b)
 
     # Predictions
     predictions = sess.run(z, feed_dict={x: test_X})
@@ -347,7 +348,7 @@ with tf.Session() as sess:
     print('Test RMSE: {} | Test MAE: {}'.format(RMSE_loss, MAE_loss))
 
     # Non-scrambled data plot
-    # seq_pred(sess, z, raw_data, min_max_normalization, 350000, 370000, adv_plot=False)
+    # seq_pred(sess, raw_data, min_max_normalization, 350000, 370000, err_plot=False)
 
     # Pickle normalization
     pickle_out = open('normalization/ls.pickle', 'wb')
