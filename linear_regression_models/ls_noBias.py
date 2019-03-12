@@ -139,11 +139,11 @@ def seq_pred(session, model, data, normalizer, time_start, time_end, adv_plot=Tr
         # Visualization of what it looks like
         stderr = np.std(np.abs(np.subtract(plot_y, preds)))
 
-        group1 = np.concatenate([np.linspace(time_start, time_end - 1, time_end - time_start).reshape(-1, 1),
+        group1 = np.concatenate([np.linspace(0, time_end - time_start - 1, time_end - time_start).reshape(-1, 1),
                                  preds[0:time_end - time_start]], axis=1)
-        group2 = np.concatenate([np.linspace(time_start, time_end - 1, time_end - time_start).reshape(-1, 1),
+        group2 = np.concatenate([np.linspace(0, time_end - time_start - 1, time_end - time_start).reshape(-1, 1),
                                  preds[0:time_end - time_start] + stderr], axis=1)
-        group3 = np.concatenate([np.linspace(time_start, time_end - 1, time_end - time_start).reshape(-1, 1),
+        group3 = np.concatenate([np.linspace(0, time_end - time_start - 1, time_end - time_start).reshape(-1, 1),
                                  preds[0:time_end - time_start] - stderr], axis=1)
 
         group = np.concatenate([group1, group2, group3])
@@ -323,7 +323,7 @@ with tf.Session() as sess:
     print('RMSE: {} | MAE: {}'.format(RMSE_loss, MAE_loss))
 
     # Visualization of what it looks like
-    seq_pred(sess, z, raw_data, min_max_normalization, 500, 3500, adv_plot=True)
+    seq_pred(sess, z, raw_data, min_max_normalization, 1, 5000, adv_plot=True)
 
     # Pickle normalization
     pickle_out = open('normalization/ls.pickle', 'wb')
