@@ -139,11 +139,11 @@ def seq_pred(session, model, data, normalizer, time_start, time_end, adv_plot=Tr
         # Visualization of what it looks like
         stderr = np.std(np.abs(np.subtract(plot_y, preds)))
 
-        group1 = np.concatenate([np.linspace(0, time_end - time_start - 1, time_end - time_start).reshape(-1, 1),
+        group1 = np.concatenate([np.linspace(time_start, time_end - 1, time_end - time_start).reshape(-1, 1),
                                  preds[0:time_end - time_start]], axis=1)
-        group2 = np.concatenate([np.linspace(0, time_end - time_start - 1, time_end - time_start).reshape(-1, 1),
+        group2 = np.concatenate([np.linspace(time_start, time_end - 1, time_end - time_start).reshape(-1, 1),
                                  preds[0:time_end - time_start] + stderr], axis=1)
-        group3 = np.concatenate([np.linspace(0, time_end - time_start - 1, time_end - time_start).reshape(-1, 1),
+        group3 = np.concatenate([np.linspace(time_start, time_end - 1, time_end - time_start).reshape(-1, 1),
                                  preds[0:time_end - time_start] - stderr], axis=1)
 
         group = np.concatenate([group1, group2, group3])
@@ -173,7 +173,7 @@ raw_data = raw_data.values
 print("Raw data has {} features with {} examples.".format(raw_data.shape[1], raw_data.shape[0]))
 
 train_X, test_X, train_y, test_y = train_test_split(raw_data[:, 1:], raw_data[:, 0],
-                                                    test_size=0.001, random_state=42, shuffle=True)
+                                                    test_size=0.05, random_state=42, shuffle=True)
 
 train_X = train_X.reshape(-1, raw_data.shape[1] - 1)
 test_X = test_X.reshape(-1, raw_data.shape[1] - 1)
@@ -323,7 +323,7 @@ with tf.Session() as sess:
     print('RMSE: {} | MAE: {}'.format(RMSE_loss, MAE_loss))
 
     # Visualization of what it looks like
-    seq_pred(sess, z, raw_data, min_max_normalization, 0, 5000, adv_plot=False)
+    seq_pred(sess, z, raw_data, min_max_normalization, 500, 3500, adv_plot=True)
 
     # Pickle normalization
     pickle_out = open('normalization/ls.pickle', 'wb')

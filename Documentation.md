@@ -164,4 +164,11 @@ Separated modules into smaller sub-components
 
 Try linear / quadratic model with intercept
 
+Linear Regression w/ intercept(Opti_withAllChangableDenCurv3):
+RMSE: 181
+MAE: 136
+
+Quadratic Model w/ intercept (Opti_withAllChangableDenCurv3):
+RMSE: 167
+MAE: 124
 
