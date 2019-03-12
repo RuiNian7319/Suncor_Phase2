@@ -50,7 +50,7 @@ path = '/home/rui/Documents/Willowglen/data/Optimization_Data/'
 parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Opti_withAllChangableDenCurv3.csv')
 parser.add_argument("--train_size", help="% of whole data set used for training", default=0.95)
 parser.add_argument('--lr', help="learning rate for the logistic regression", default=0.003)
-parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=256)
+parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=512)
 parser.add_argument("--epochs", help="Number of times data should be recycled through", default=30)
 parser.add_argument("--tensorboard_path", help="Location of saved tensorboard information", default="./tensorboard")
 parser.add_argument("--model_path", help="Location of saved tensorflow graph", default='checkpoints/ls_withAllPressure.ckpt')
@@ -117,6 +117,9 @@ def seq_pred(session, model, data, normalizer, time_start, time_end, adv_plot=Tr
     plot_x = data[time_start:time_end, 1:]
     plot_y = data[time_start:time_end, 0]
 
+    plot_x = plot_x.reshape(-1, data.shape[1] - 1)
+    plot_y = plot_y.reshape(-1, 1)
+
     preds = session.run(model, feed_dict={x: plot_x})
 
     # Unnormalize data
@@ -167,7 +170,6 @@ raw_data = pd.read_csv(Args['data'])
 
 # Turn Pandas dataframe into NumPy Array
 raw_data = raw_data.values
-raw_data = raw_data[0:5000, :]
 print("Raw data has {} features with {} examples.".format(raw_data.shape[1], raw_data.shape[0]))
 
 train_X, test_X, train_y, test_y = train_test_split(raw_data[:, 1:], raw_data[:, 0],
@@ -302,22 +304,21 @@ with tf.Session() as sess:
         print("Model was saved in {}".format(save_path))
 
     # Output weights
-
     weights = sess.run(W)
 
     # Predictions
-    predictions = sess.run(z, feed_dict={x: test_X})
+    predictions = sess.run(z, feed_dict={x: train_X, y: train_y})
 
     # Unnormalize data
     predictions = np.multiply(predictions, min_max_normalization.denominator[0, 0])
     predictions = predictions + min_max_normalization.col_min[0, 0]
 
-    test_y = np.multiply(test_y, min_max_normalization.denominator[0, 0])
-    test_y = test_y + min_max_normalization.col_min[0, 0]
+    train_X = np.multiply(train_y, min_max_normalization.denominator[0, 0])
+    train_X = train_X + min_max_normalization.col_min[0, 0]
 
     # RMSE & MAE Calc
-    RMSE_loss = np.sqrt(np.mean(np.square(np.subtract(test_y, predictions))))
-    MAE_loss = np.mean(np.abs(np.subtract(test_y, predictions)))
+    RMSE_loss = np.sqrt(np.mean(np.square(np.subtract(train_X, predictions))))
+    MAE_loss = np.mean(np.abs(np.subtract(train_X, predictions)))
 
     print('RMSE: {} | MAE: {}'.format(RMSE_loss, MAE_loss))
 

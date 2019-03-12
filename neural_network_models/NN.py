@@ -83,6 +83,9 @@ def seq_pred(session, model, data, normalizer, time_start, time_end, adv_plot=Tr
     plot_x = data[time_start:time_end, 1:]
     plot_y = data[time_start:time_end, 0]
 
+    plot_x = plot_x.reshape(-1, data.shape[1] - 1)
+    plot_y = plot_y.reshape(-1, 1)
+
     preds = session.run(model, feed_dict={X: plot_x, is_train: False})
 
     # Unnormalize data
@@ -164,14 +167,14 @@ h2_nodes = 30
 h3_nodes = 30
 output_size = 1
 
-batch_size = 256
+batch_size = 512
 total_batch_number = int(train_X.shape[0] / batch_size)
 
 X = tf.placeholder(dtype=tf.float32, shape=[None, input_size])
 y = tf.placeholder(dtype=tf.float32, shape=[None, output_size])
 
 # Batch normalization
-training = False
+training = True
 is_train = tf.placeholder(dtype=tf.bool, name='is_train')
 
 hidden_layer_1 = {'weights': tf.get_variable('h1_weights', shape=[input_size, h1_nodes],
@@ -301,39 +304,9 @@ with tf.Session() as sess:
     print('RMSE: {} | MAE: {}'.format(RMSE_loss, MAE_loss))
 
     # Non-scrambled data plot
-    # seq_pred(sess, output, raw_data, min_max_normalization, 35000, 37000, adv_plot=False)
+    seq_pred(sess, output, raw_data, min_max_normalization, 0, 5000, adv_plot=False)
 
     # Pickle normalization
     pickle_out = open('normalization/norm_nn.pickle', 'wb')
     pickle.dump(min_max_normalization, pickle_out)
     pickle_out.close()
-
-    # Normalize
-    time_start = 0
-    time_end = 500
-    data = min_max_normalization(raw_data)
-    plot_x = data[time_start:time_end, 1:]
-    plot_y = data[time_start:time_end, 0]
-
-    preds = sess.run(output, feed_dict={X: plot_x, is_train: False})
-
-    # Unnormalize data
-    preds = np.multiply(preds, min_max_normalization.denominator[0, 0])
-    preds = preds + min_max_normalization.col_min[0, 0]
-
-    plot_y = np.multiply(plot_y, min_max_normalization.denominator[0, 0])
-    plot_y = plot_y + min_max_normalization.col_min[0, 0]
-
-    # RMSE & MAE Calc
-    rmse_loss = np.sqrt(np.mean(np.square(np.subtract(plot_y, preds))))
-    mae_loss = np.mean(np.abs(np.subtract(plot_y, preds)))
-
-    print('RMSE: {} | MAE: {}'.format(rmse_loss, mae_loss))
-
-    plt.plot(preds[time_start:time_end])
-    plt.plot(plot_y[time_start:time_end])
-
-    plt.xlabel('Samples')
-    plt.ylabel('Flow rate, bbl/h')
-    plt.show()
-

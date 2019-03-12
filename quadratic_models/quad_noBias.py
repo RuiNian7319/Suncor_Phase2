@@ -51,7 +51,7 @@ parser.add_argument("--data", help="Data to be loaded into the model", default=p
 parser.add_argument("--train_size", help="% of whole data set used for training", default=0.95)
 parser.add_argument('--lr', help="learning rate for the logistic regression", default=0.003)
 parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=512)
-parser.add_argument("--epochs", help="Number of times data should be recycled through", default=1)
+parser.add_argument("--epochs", help="Number of times data should be recycled through", default=25)
 parser.add_argument("--tensorboard_path", help="Location of saved tensorboard information", default="./tensorboard")
 parser.add_argument("--model_path", help="Location of saved tensorflow graph", default='checkpoints/ls_withAllPressure.ckpt')
 parser.add_argument("--save_graph", help="Save the current tensorflow computational graph", default=True)
@@ -112,6 +112,9 @@ def seq_pred(session, model, data, normalizer, time_start, time_end, adv_plot=Tr
     data = normalizer(data)
     plot_x = data[time_start:time_end, 1:]
     plot_y = data[time_start:time_end, 0]
+
+    plot_x = plot_x.reshape(-1, data.shape[1] - 1)
+    plot_y = plot_y.reshape(-1, 1)
 
     preds = session.run(model, feed_dict={x: plot_x})
 
@@ -347,7 +350,7 @@ with tf.Session() as sess:
     print('Test RMSE: {} | Test MAE: {}'.format(RMSE_loss, MAE_loss))
 
     # Non-scrambled data plot
-    # seq_pred(sess, z, raw_data, min_max_normalization, 350000, 370000, adv_plot=False)
+    seq_pred(sess, z, raw_data, min_max_normalization, 0, 5000, adv_plot=False)
 
     # Pickle normalization
     pickle_out = open('normalization/ls.pickle', 'wb')

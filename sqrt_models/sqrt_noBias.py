@@ -25,6 +25,12 @@ import seaborn as sns
 import pickle
 
 import warnings
+
+import sys
+sys.path.insert(0, '/home/rui/Documents/Willowglen/Suncor_Phase2')
+
+from EWMA import ewma
+
 warnings.filterwarnings('ignore')
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'
 
@@ -111,6 +117,9 @@ def seq_pred(session, data, normalizer, time_start, time_end, err_plot=True):
     plot_x = data[time_start:time_end, 1:]
     plot_y = data[time_start:time_end, 0]
 
+    plot_x = plot_x.reshape(-1, data.shape[1] - 1)
+    plot_y = plot_y.reshape(-1, 1)
+
     preds = session.run(z, feed_dict={x: plot_x})
 
     # Unnormalize data
@@ -119,6 +128,9 @@ def seq_pred(session, data, normalizer, time_start, time_end, err_plot=True):
 
     plot_y = np.multiply(plot_y, normalizer.denominator[0, 0])
     plot_y = plot_y + normalizer.col_min[0, 0]
+
+    preds = ewma(beta=0.9, vector=preds)
+    preds = preds.reshape(-1, 1)
 
     # RMSE & MAE Calc
     rmse_loss = np.sqrt(np.mean(np.square(np.subtract(plot_y, preds))))
@@ -345,7 +357,7 @@ with tf.Session() as sess:
     print('Test RMSE: {} | Test MAE: {}'.format(RMSE_loss, MAE_loss))
 
     # Non-scrambled data plot
-    # seq_pred(sess, raw_data, min_max_normalization, 350000, 370000, err_plot=False)
+    seq_pred(sess, raw_data, min_max_normalization, 1, 5999, err_plot=False)
 
     # Pickle normalization
     pickle_out = open('normalization/ls.pickle', 'wb')

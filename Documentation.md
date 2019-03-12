@@ -114,7 +114,7 @@ MAE:  ~135
 Build sqrt model
 
 
-### March 10th
+### March 11th
 Add currents at Cheyenne and FL
 
 Linear Regression (Opti_withAllChangableDenCur):
@@ -144,5 +144,24 @@ MAE: 136
 Neural Network (Opti_withAllChangableDenCurv3):
 RMSE: 112
 MAE: 82
+
+Quadratic Model (Opti_withAllChangableDenCurv3):
+RMSE: 167
+MAE: 124
+
+Sqrt Model (Opti_withAllChangableDenCurv3):
+RMSE: 162
+MAE: 122
+
+Sqrt Model w/ intercept (Opti_withAllChangableDenCurv3):
+RMSE: 162
+MAE: 122
+
+### March 12th
+Fixed error bug, it was because of no data reshaping.
+Adding exponentionally smoothing makes the plots look better and reduces error
+Separated modules into smaller sub-components
+
+Try linear / quadratic model with intercept
 
 
