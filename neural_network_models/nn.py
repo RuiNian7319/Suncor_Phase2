@@ -137,7 +137,7 @@ with tf.control_dependencies(update_ops):
 
 init = tf.global_variables_initializer()
 
-epochs = 25
+epochs = 2
 loss_history = []
 
 saver = tf.train.Saver()
@@ -216,7 +216,7 @@ with tf.Session() as sess:
     print('RMSE: {} | MAE: {}'.format(RMSE_loss, MAE_loss))
 
     # Non-scrambled data plot
-    seq_pred(sess, output, raw_data, min_max_normalization, 0, 5000, adv_plot=False)
+    # seq_pred(sess, output, raw_data, min_max_normalization, 0, 5000, adv_plot=False)
 
     # Pickle normalization
     pickle_out = open('normalization/norm_nn.pickle', 'wb')
