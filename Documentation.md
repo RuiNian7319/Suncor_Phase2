@@ -25,6 +25,7 @@ Opti_withAllChangableDenCurv3: Includes all changable (no pressures), density, a
 2. Density increases prediction accuracy
 3. VFD Current at Cheyenne matters a lot
 4. Unnormalized data increases training time significantly
+5. Inlet pressure has nothing to do with outlet pressure when predicting pressure for constraints
 
 
 # Updates
@@ -177,6 +178,14 @@ MAE: 124
 Removing normalization
 
 Linear Regression w/ intercept non-normalized (Opti_withAllChangableDenCurv3):
-Ran for 4500 epochs vs. around 3.
+Ran for 4500 epochs vs. around 3 (requires a hr).
 RMSE: 181
 MAE: 135
+
+Building pressure constraint models
+
+Linear Regression w/ intercept non-normalized (Chey_Pres):
+Ran for 1000 epochs.
+RMSE: 130
+MAE: 
+

@@ -25,14 +25,6 @@ import seaborn as sns
 import pickle
 
 import warnings
-
-import sys
-sys.path.insert(0, '/home/rui/Documents/Willowglen/Suncor_Phase2')
-
-from EWMA import ewma
-from Seq_plot import seq_pred
-from MinMaxNorm import MinMaxNormalization
-
 warnings.filterwarnings('ignore')
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'
 
@@ -50,16 +42,16 @@ parser = argparse.ArgumentParser(description="Inputs to the linear regression")
 
 # MacOS & Ubuntu 18.04 path
 # path = '/Users/ruinian/Documents/Willowglen/data/'
-path = '/home/rui/Documents/Willowglen/data/Optimization_Data/'
+path = '/home/rui/Documents/Willowglen/data/PresConstr_Data/'
 
 # Arguments
-parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Opti_withAllChangableDenCurv3.csv')
+parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Chey_Pres.csv')
 parser.add_argument("--train_size", help="% of whole data set used for training", default=0.95)
 parser.add_argument('--lr', help="learning rate for the logistic regression", default=0.003)
 parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=1024)
-parser.add_argument("--epochs", help="Number of times data should be recycled through", default=1000)
+parser.add_argument("--epochs", help="Number of times data should be recycled through", default=500)
 parser.add_argument("--tensorboard_path", help="Location of saved tensorboard information", default="./tensorboard")
-parser.add_argument("--model_path", help="Location of saved tensorflow graph", default='checkpoints/ls_withAllPressure.ckpt')
+parser.add_argument("--model_path", help="Location of saved tensorflow graph", default='checkpoints/ls_noNorm.ckpt')
 parser.add_argument("--save_graph", help="Save the current tensorflow computational graph", default=True)
 parser.add_argument("--restore_graph", help="Reload model parameters from saved location", default=False)
 
@@ -77,6 +69,102 @@ Logistic Regression
 seed = 18
 np.random.seed(seed)
 tf.set_random_seed(seed)
+
+
+# Min max normalization
+class MinMaxNormalization:
+    """
+    Inputs
+       -----
+            data:  Input feature vectors from the training data
+    Attributes
+       -----
+         col_min:  The minimum value per feature
+         col_max:  The maximum value per feature
+     denominator:  col_max - col_min
+     Methods
+        -----
+     init:  Builds the col_min, col_max, and denominator
+     call:  Normalizes data based on init attributes
+    """
+
+    def __init__(self, data):
+        self.col_min = np.min(data, axis=0).reshape(1, data.shape[1])
+        self.col_max = np.max(data, axis=0).reshape(1, data.shape[1])
+        self.denominator = abs(self.col_max - self.col_min)
+
+        # Fix divide by zero, replace value with 1 because these usually happen for boolean columns
+        for index, value in enumerate(self.denominator[0]):
+            if value == 0:
+                self.denominator[0][index] = 1
+
+    def __call__(self, data):
+        return np.divide((data - self.col_min), self.denominator)
+
+    def unnormalize(self, data):
+
+        data = np.multiply(data, self.denominator)
+        data = data + self.col_min
+
+        return data
+
+
+def seq_pred(session, model, data, normalizer, time_start, time_end, adv_plot=True):
+    # Normalize
+    if normalizer is not None:
+        data = normalizer(data)
+
+    plot_x = data[time_start:time_end, 1:]
+    plot_y = data[time_start:time_end, 0]
+
+    plot_x = plot_x.reshape(-1, data.shape[1] - 1)
+    plot_y = plot_y.reshape(-1, 1)
+
+    preds = session.run(model, feed_dict={x: plot_x})
+
+    # Unnormalize data
+    if normalizer is not None:
+        preds = np.multiply(preds, normalizer.denominator[0, 0])
+        preds = preds + normalizer.col_min[0, 0]
+
+        plot_y = np.multiply(plot_y, normalizer.denominator[0, 0])
+        plot_y = plot_y + normalizer.col_min[0, 0]
+
+    # RMSE & MAE Calc
+    rmse_loss = np.sqrt(np.mean(np.square(np.subtract(plot_y, preds))))
+    mae_loss = np.mean(np.abs(np.subtract(plot_y, preds)))
+
+    print('RMSE: {} | MAE: {}'.format(rmse_loss, mae_loss))
+
+    if adv_plot:
+        # Visualization of what it looks like
+        stderr = np.std(np.abs(np.subtract(plot_y, preds)))
+
+        group1 = np.concatenate([np.linspace(0, time_end - time_start - 1, time_end - time_start).reshape(-1, 1),
+                                 preds[0:time_end - time_start]], axis=1)
+        group2 = np.concatenate([np.linspace(0, time_end - time_start - 1, time_end - time_start).reshape(-1, 1),
+                                 preds[0:time_end - time_start] + stderr], axis=1)
+        group3 = np.concatenate([np.linspace(0, time_end - time_start - 1, time_end - time_start).reshape(-1, 1),
+                                 preds[0:time_end - time_start] - stderr], axis=1)
+
+        group = np.concatenate([group1, group2, group3])
+
+        df = pd.DataFrame(group, columns=['time', 'predictions'])
+
+        sns.lineplot(x='time', y='predictions', data=df)
+        plt.plot(plot_y[time_start:time_end])
+
+        plt.xlabel('Samples')
+        plt.ylabel('Flow rate, bbl/h')
+        plt.show()
+    else:
+        plt.plot(preds[time_start:time_end])
+        plt.plot(plot_y[time_start:time_end])
+
+        plt.xlabel('Samples')
+        plt.ylabel('Flow rate, bbl/h')
+        plt.show()
+
 
 # Loading data
 raw_data = pd.read_csv(Args['data'])
