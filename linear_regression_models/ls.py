@@ -1,7 +1,7 @@
 """
 Linear Regression Patch 1.1
 
-Patch notes:  Added tensorboard, saver
+Patch notes:
 
 Rui Nian
 """

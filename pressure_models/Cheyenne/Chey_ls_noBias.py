@@ -1,13 +1,9 @@
 """
-Linear Regression Patch 1.0
+Linear Regression with no Bias for Cheyenne pressures Patch 1.0
 
-Patch notes:  Added tensorboard, saver
+Patch notes:
 
-Date of last edit: February 18th
 Rui Nian
-
-Current issues: Output size is hard coded
-                Cannot run code purely to test the accuracy of algorithm
 """
 
 import numpy as np
@@ -27,6 +23,14 @@ import seaborn as sns
 import pickle
 
 import warnings
+
+import sys
+sys.path.insert(0, '/home/rui/Documents/Willowglen/Suncor_Phase2')
+
+from EWMA import ewma
+from Seq_plot import seq_pred
+from MinMaxNorm import MinMaxNormalization
+
 warnings.filterwarnings('ignore')
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'
 
