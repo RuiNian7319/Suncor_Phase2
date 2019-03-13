@@ -2,11 +2,11 @@
 
 ## Sub-folders
 
-linear_regression_models: Linear regression models.  A variant of $y = \sum\limits^\infty_{i=0} \theta_i X$
-sqrt_models:
-quadratic_models:
-neural_network_models:
-pressure_models:
+linear_regression_models: Linear regression.  A variant of $y = \sum\limits^\infty_{i=0} \theta_i X$ <br>
+sqrt_models: <br>
+quadratic_models: <br>
+neural_network_models: <br>
+pressure_models: <br>
 
 ## Sub-modules
 
