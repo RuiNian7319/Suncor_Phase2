@@ -2,16 +2,15 @@
 
 ## Sub-folders
 
-linear_regression_models: Linear regression.  A variant of:
-- <img src="https://latex.codecogs.com/gif.latex?y = \sum\limits^\infty_{i=0} \theta_i X " />  <br>
-- <img src="https://latex.codecogs.com/gif.latex?O_t=\text { Onset event at time bin } t " /> 
-sqrt_models: Square root regression.  A variant of <br>
-quadratic_models: <br>
-neural_network_models: <br>
-pressure_models: <br>
+**linear_regression_models**: Linear models for overall optimization. Regressors: X <br>
+**sqrt_models**: Sqrt models for overall optimization.  Regressor: sqrt(X), X <br>
+**quadratic_models**: Quadratic models for overall optimization.  Regressors: X^2, X <br>
+**neural_network_models**: Neural networks for overall optimization.  Regressors: X <br>
+**pressure_models**: Pressure constraint models.  Built for discharge at Cheyenne, Ault, and Fort Lupton. <br>
+**pressure_current_models**:  Transforming currents to an expected pressure, so the operators can put that as a set-point. <br>
 
 ## Sub-modules
 
-EWMA: Exponentially weighted moving average code.  Used for exponentially smoothing data. <br>
-MinMaxNorm: Min-Max normalization. $x_{norm} = \frac{x_i - x_{min}}{x_{max} - x_{min]}$ <br>
-Seq_plot: Sequential plot definition to validate the machine learning models in production <br>
+**EWMA**: Exponentially weighted moving average code.  Used for exponentially smoothing data. <br>
+**MinMaxNorm**: Min-Max normalization. $x_{norm} = \frac{x_i - x_{min}}{x_{max} - x_{min]}$ <br>
+**Seq_plot**: Sequential plot definition to validate the machine learning models in production <br>
