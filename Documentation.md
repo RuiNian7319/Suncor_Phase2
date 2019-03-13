@@ -24,6 +24,7 @@ Opti_withAllChangableDenCurv3: Includes all changable (no pressures), density, a
 1. Fort Lupton pressure reading is 90% correlated with pressure.
 2. Density increases prediction accuracy
 3. VFD Current at Cheyenne matters a lot
+4. Unnormalized data increases training time significantly
 
 
 # Updates
@@ -172,3 +173,10 @@ Quadratic Model w/ intercept (Opti_withAllChangableDenCurv3):
 RMSE: 167
 MAE: 124
 
+### March 13th
+Removing normalization
+
+Linear Regression w/ intercept non-normalized (Opti_withAllChangableDenCurv3):
+Ran for 4500 epochs vs. around 3.
+RMSE: 181
+MAE: 135
