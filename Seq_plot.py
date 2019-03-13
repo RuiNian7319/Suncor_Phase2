@@ -5,10 +5,11 @@ Rui Nian
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
 import tensorflow as tf
-import seaborn as sns
 import pandas as pd
+
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 
 def seq_pred(session, model, data, normalizer, time_start, time_end, adv_plot=True):
@@ -85,6 +86,7 @@ def seq_pred(session, model, data, normalizer, time_start, time_end, adv_plot=Tr
         plt.xlabel('Samples')
         plt.ylabel('Flow rate, bbl/h')
         plt.show()
+
     else:
         # Visualization of model in production without fancy error bars
         plt.plot(preds[time_start:time_end])

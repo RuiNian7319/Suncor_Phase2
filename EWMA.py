@@ -23,15 +23,17 @@ def ewma(beta, vector):
     Returns
        ---
       ewma_num: Exponentially smoothed vector
-
     """
+
     ewma_num = np.zeros(len(vector))
 
     for j in range(len(ewma_num)):
 
+        # Break when its the last element in the list
         if j == (len(ewma_num) - 1):
             break
 
+        # Calculate the smoothed value
         ewma_num[j + 1] = beta * ewma_num[j] + (1 - beta) * vector[j + 1]
 
         # Bias correction

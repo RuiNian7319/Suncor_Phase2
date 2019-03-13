@@ -13,6 +13,8 @@ Current issues:
 import numpy as np
 import pickle
 
+import matplotlib.pyplot as plt
+
 
 # Min max normalization
 class MinMaxNormalization:
@@ -46,11 +48,48 @@ class MinMaxNormalization:
                 self.denominator[0][index] = 1
 
     def __call__(self, data):
+        """
+        Inputs
+            -----
+               Data:  Data to be normalized.  In shape [Y | X]
+
+        Returns
+            -----
+               Data:  Normalized data.  In shape [Y | X]
+        """
+
         return np.divide((data - self.col_min), self.denominator)
 
     def unnormalize(self, data):
+        """
+        Inputs
+            -----
+               Data:  Data to be unnormalized.  In shape [Y | X]
+
+        Returns
+            -----
+               Data:  unormalized data.  In shape [Y | X]
+        """
 
         data = np.multiply(data, self.denominator)
         data = data + self.col_min
 
         return data
+
+
+if __name__ == "__main__":
+
+    # Generate pseudo-random numbers
+    unnorm_numbers = np.random.normal(500, 15, size=[10, 10])
+
+    # Construct normalization parameters
+    min_max_normalization = MinMaxNormalization(unnorm_numbers)
+
+    # Normalized data
+    norm_data = min_max_normalization(unnorm_numbers)
+
+    # Plot the normalized values.  All values should be between 0 - 1
+    for i in range(norm_data.shape[1]):
+        plt.plot(norm_data[i, :])
+
+    plt.show()

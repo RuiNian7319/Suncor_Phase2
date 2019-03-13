@@ -57,7 +57,7 @@ parser.add_argument('--lr', help="learning rate for the logistic regression", de
 parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=512)
 parser.add_argument("--epochs", help="Number of times data should be recycled through", default=30)
 parser.add_argument("--tensorboard_path", help="Location of saved tensorboard information", default="./tensorboard")
-parser.add_argument("--model_path", help="Location of saved tensorflow graph", default='checkpoints/ls_withAllPressure.ckpt')
+parser.add_argument("--model_path", help="Location of saved tensorflow graph", default='checkpoints/ls.ckpt')
 parser.add_argument("--save_graph", help="Save the current tensorflow computational graph", default=True)
 parser.add_argument("--restore_graph", help="Reload model parameters from saved location", default=False)
 
