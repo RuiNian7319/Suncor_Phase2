@@ -1,9 +1,11 @@
 """
-Linear Regression Patch 1.1
+Linear Regression Patch 1.0
 
-Patch notes:
+Patch notes:  Added tensorboard, saver
 
 Rui Nian
+
+Current issues:
 """
 
 import numpy as np
@@ -48,16 +50,16 @@ parser = argparse.ArgumentParser(description="Inputs to the linear regression")
 
 # MacOS & Ubuntu 18.04 path
 # path = '/Users/ruinian/Documents/Willowglen/data/'
-path = '/home/rui/Documents/Willowglen/data/Optimization_Data/'
+path = '/home/rui/Documents/Willowglen/data/PresCur_Data/'
 
 # Arguments
-parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Opti_withAllChangableDenCurv3.csv')
+parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Cur2Pres_Chey.csv')
 parser.add_argument("--train_size", help="% of whole data set used for training", default=0.95)
 parser.add_argument('--lr', help="learning rate for the linear regression", default=0.003)
-parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=512)
-parser.add_argument("--epochs", help="Number of times data should be recycled through", default=30)
+parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=1024)
+parser.add_argument("--epochs", help="Number of times data should be recycled through", default=100)
 parser.add_argument("--tensorboard_path", help="Location of saved tensorboard information", default="./tensorboard")
-parser.add_argument("--model_path", help="Location of saved tensorflow graph", default='checkpoints/ls.ckpt')
+parser.add_argument("--model_path", help="Location of saved tensorflow graph", default='checkpoints/Chey_noNorm.ckpt')
 parser.add_argument("--save_graph", help="Save the current tensorflow computational graph", default=True)
 parser.add_argument("--restore_graph", help="Reload model parameters from saved location", default=False)
 
@@ -87,17 +89,6 @@ test_X = test_X.reshape(-1, raw_data.shape[1] - 1)
 
 train_y = train_y.reshape(-1, 1)
 test_y = test_y.reshape(-1, 1)
-
-# Normalization.  Recombine to normalize at once, then split them into their train/test forms
-min_max_normalization = MinMaxNormalization(np.concatenate([train_y, train_X], axis=1))
-training_data = min_max_normalization(np.concatenate([train_y, train_X], axis=1))
-testing_data = min_max_normalization(np.concatenate([test_y, test_X], axis=1))
-
-train_X = training_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
-test_X = testing_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
-
-train_y = training_data[:, 0].reshape(-1, 1)
-test_y = testing_data[:, 0].reshape(-1, 1)
 
 # Neural network parameters
 input_size = train_X.shape[1]
@@ -171,7 +162,7 @@ with tf.Session() as sess:
             # Evaluate losses
             if i % 550 == 0:
 
-                # Add to summary writer
+                # # Add to summary writer
                 # summary_writer.add_summary(summary, i)
 
                 """
@@ -179,30 +170,14 @@ with tf.Session() as sess:
                 """
 
                 train_pred = sess.run(z, feed_dict={x: train_X, y: train_y})
-
-                # Unnormalize data
-                train_pred = np.multiply(train_pred, min_max_normalization.denominator[0, 0])
-                train_pred = train_pred + min_max_normalization.col_min[0, 0]
-
-                actual_labels = np.multiply(train_y, min_max_normalization.denominator[0, 0])
-                actual_labels = actual_labels + min_max_normalization.col_min[0, 0]
-
-                train_loss = np.sqrt(np.mean(np.square(np.subtract(actual_labels, train_pred))))
+                train_loss = np.sqrt(np.mean(np.square(np.subtract(train_y, train_pred))))
 
                 """
                 Test data
                 """
 
                 test_pred = sess.run(z, feed_dict={x: test_X, y: test_y})
-
-                # Unnormalize data
-                test_pred = np.multiply(test_pred, min_max_normalization.denominator[0, 0])
-                test_pred = test_pred + min_max_normalization.col_min[0, 0]
-
-                actual_labels = np.multiply(test_y, min_max_normalization.denominator[0, 0])
-                actual_labels = actual_labels + min_max_normalization.col_min[0, 0]
-
-                test_loss = np.sqrt(np.mean(np.square(np.subtract(actual_labels, test_pred))))
+                test_loss = np.sqrt(np.mean(np.square(np.subtract(test_y, test_pred))))
 
                 print('Epoch: {} | Loss: {:2f} | Train Error: {:2f} | Test Error: {:2f}'.format(epoch,
                                                                                                 current_loss,
@@ -218,25 +193,14 @@ with tf.Session() as sess:
     biases = sess.run(b)
 
     # Predictions
-    predictions = sess.run(z, feed_dict={x: train_X, y: train_y})
-
-    # Unnormalize data
-    predictions = np.multiply(predictions, min_max_normalization.denominator[0, 0])
-    predictions = predictions + min_max_normalization.col_min[0, 0]
-
-    train_X = np.multiply(train_y, min_max_normalization.denominator[0, 0])
-    train_X = train_X + min_max_normalization.col_min[0, 0]
+    predictions = sess.run(z, feed_dict={x: test_X, y: test_y})
 
     # RMSE & MAE Calc
-    RMSE_loss = np.sqrt(np.mean(np.square(np.subtract(train_X, predictions))))
-    MAE_loss = np.mean(np.abs(np.subtract(train_X, predictions)))
+    RMSE_loss = np.sqrt(np.mean(np.square(np.subtract(test_y, predictions))))
+    MAE_loss = np.mean(np.abs(np.subtract(test_y, predictions)))
 
     print('RMSE: {} | MAE: {}'.format(RMSE_loss, MAE_loss))
 
     # Visualization of what it looks like
-    seq_pred(sess, z, x, raw_data, min_max_normalization, 0, 5000, adv_plot=False)
-
-    # Pickle normalization
-    pickle_out = open('normalization/ls.pickle', 'wb')
-    pickle.dump(min_max_normalization, pickle_out)
-    pickle_out.close()
+    seq_pred(session=sess, model=z, features=x, normalizer=None, data=raw_data, time_start=1, time_end=5000,
+             adv_plot=False, xlabel='Time', ylabel='Discharge Pressure')

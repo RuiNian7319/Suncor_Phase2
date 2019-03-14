@@ -3,11 +3,9 @@ Normalization class Patch 1.0
 
 Patch notes: -
 
-Date of last edit: February 21st, 2019
 Rui Nian
 
 Current issues:
-
 """
 
 import numpy as np

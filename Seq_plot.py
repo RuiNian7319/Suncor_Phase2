@@ -12,7 +12,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-def seq_pred(session, model, data, normalizer, time_start, time_end, adv_plot=True):
+def seq_pred(session, model, features, data, normalizer, time_start, time_end, xlabel='Time', ylabel='Flow Rate',
+             adv_plot=True):
     """
     Description
         ----
@@ -24,10 +25,13 @@ def seq_pred(session, model, data, normalizer, time_start, time_end, adv_plot=Tr
         ----
              session: Tensorflow session. Usually: sess
                model: Tensorflow regression model. Ex: z = tf.matmul(W, x) + b
+            features: Tensorflow placeholder for the features.
                 data: Raw data to test.  Data in form of [labels, features]
           normalizer: Normalization object.  If un-normalized data is preferred, pass normalizer=None
           time_start: Start index in the data
             time_end: End index in the data
+              xlabel:
+              ylabel:
             adv_plot: Plot with fancy error bars
 
     Outputs (No returns)
@@ -49,7 +53,7 @@ def seq_pred(session, model, data, normalizer, time_start, time_end, adv_plot=Tr
     plot_y = plot_y.reshape(-1, 1)
 
     # Run tensorflow model to get predicted y
-    preds = session.run(model, feed_dict={x: plot_x})
+    preds = session.run(model, feed_dict={features: plot_x})
 
     # Unnormalize data
     if normalizer is not None:
@@ -63,7 +67,7 @@ def seq_pred(session, model, data, normalizer, time_start, time_end, adv_plot=Tr
     rmse_loss = np.sqrt(np.mean(np.square(np.subtract(plot_y, preds))))
     mae_loss = np.mean(np.abs(np.subtract(plot_y, preds)))
 
-    print('RMSE: {} | MAE: {}'.format(rmse_loss, mae_loss))
+    print('Seq. RMSE: {} | Seq. MAE: {}'.format(rmse_loss, mae_loss))
 
     if adv_plot:
         # Visualization of model in production with fancy error bars
@@ -81,17 +85,21 @@ def seq_pred(session, model, data, normalizer, time_start, time_end, adv_plot=Tr
         df = pd.DataFrame(group, columns=['time', 'predictions'])
 
         sns.lineplot(x='time', y='predictions', data=df)
-        plt.plot(plot_y[time_start:time_end])
+        plt.plot(plot_y[time_start:time_end], label='Actual')
 
-        plt.xlabel('Samples')
-        plt.ylabel('Flow rate, bbl/h')
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.legend(loc=0, frameon=False)
+
         plt.show()
 
     else:
         # Visualization of model in production without fancy error bars
-        plt.plot(preds[time_start:time_end])
-        plt.plot(plot_y[time_start:time_end])
+        plt.plot(preds[time_start:time_end], label='Predicted')
+        plt.plot(plot_y[time_start:time_end], label='Actual')
 
-        plt.xlabel('Samples')
-        plt.ylabel('Flow rate, bbl/h')
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.legend(loc=0, frameon=False)
+
         plt.show()

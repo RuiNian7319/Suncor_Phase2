@@ -27,6 +27,7 @@ Opti_withAllChangableDenCurv3: Includes all changable (no pressures), density, a
 4. Unnormalized data increases training time significantly
 5. Inlet pressure has nothing to do with outlet pressure when predicting pressure for constraints
 6. Inlet and outlet pressures might both matter for current-to-pressure
+  - Some deltaP are 0, but the VFDs are still on
 
 
 # Updates
