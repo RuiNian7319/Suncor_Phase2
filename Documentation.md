@@ -209,5 +209,14 @@ Linear Regression w/ intercept non-normalized (Cur2Pres_FL):
 RMSE: 30
 MAE: 22
 
+### March 15th
+Constrained model built
 
+Linear Regression w/ intercept normalized, with Constraint (Opti_withAllChangableDenCurv3):
+RMSE: 181
+MAE: 136
+
+Linear Regression w/ intercept un-normalized, with Constraint (Opti_withAllChangableDenCurv3):
+RMSE: 183
+MAE: 136
 

@@ -54,8 +54,8 @@ path = '/home/rui/Documents/Willowglen/data/Optimization_Data/'
 parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Opti_withAllChangableDenCurv3.csv')
 parser.add_argument("--train_size", help="% of whole data set used for training", default=0.95)
 parser.add_argument('--lr', help="learning rate for the linear regression", default=0.003)
-parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=512)
-parser.add_argument("--epochs", help="Number of times data should be recycled through", default=30)
+parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=1024)
+parser.add_argument("--epochs", help="Number of times data should be recycled through", default=2000)
 parser.add_argument("--tensorboard_path", help="Location of saved tensorboard information", default="./tensorboard")
 parser.add_argument("--model_path", help="Location of saved tensorflow graph", default='checkpoints/ls.ckpt')
 parser.add_argument("--save_graph", help="Save the current tensorflow computational graph", default=True)
@@ -82,26 +82,15 @@ print("Raw data has {} features with {} examples.".format(raw_data.shape[1], raw
 train_X, test_X, train_y, test_y = train_test_split(raw_data[:, 1:], raw_data[:, 0],
                                                     test_size=0.05, random_state=42, shuffle=True)
 
-train_X = train_X.reshape(-1, raw_data.shape[1] - 1)
-test_X = test_X.reshape(-1, raw_data.shape[1] - 1)
+# X1: Constrained, strictly positive weights  X2: Unconstrained weights
+train_X1 = train_X[:, :10].reshape(-1, 10)
+train_X2 = train_X[:, 10:].reshape(-1, 3)
+
+test_X1 = test_X[:, :10].reshape(-1, 10)
+test_X2 = test_X[:, 10:].reshape(-1, 3)
 
 train_y = train_y.reshape(-1, 1)
 test_y = test_y.reshape(-1, 1)
-
-# Normalization.  Recombine to normalize at once, then split them into their train/test forms
-min_max_normalization = MinMaxNormalization(np.concatenate([train_y, train_X], axis=1))
-training_data = min_max_normalization(np.concatenate([train_y, train_X], axis=1))
-testing_data = min_max_normalization(np.concatenate([test_y, test_X], axis=1))
-
-# X1: Constrained, strictly positive weights  X2: Unconstrained weights
-train_X1 = training_data[:, 1:11].reshape(-1, 10)
-train_X2 = training_data[:, 11:].reshape(-1, 3)
-
-test_X1 = testing_data[:, 1:11].reshape(-1, 10)
-test_X2 = testing_data[:, 11:].reshape(-1, 3)
-
-train_y = training_data[:, 0].reshape(-1, 1)
-test_y = testing_data[:, 0].reshape(-1, 1)
 
 # Neural network parameters
 input_size1 = train_X1.shape[1]
@@ -191,14 +180,7 @@ with tf.Session() as sess:
 
                 train_pred = sess.run(z, feed_dict={X1: train_X1, X2: train_X2, y: train_y})
 
-                # Unnormalize data
-                train_pred = np.multiply(train_pred, min_max_normalization.denominator[0, 0])
-                train_pred = train_pred + min_max_normalization.col_min[0, 0]
-
-                actual_labels = np.multiply(train_y, min_max_normalization.denominator[0, 0])
-                actual_labels = actual_labels + min_max_normalization.col_min[0, 0]
-
-                train_loss = np.sqrt(np.mean(np.square(np.subtract(actual_labels, train_pred))))
+                train_loss = np.sqrt(np.mean(np.square(np.subtract(train_y, train_pred))))
 
                 """
                 Test data
@@ -206,14 +188,7 @@ with tf.Session() as sess:
 
                 test_pred = sess.run(z, feed_dict={X1: test_X1, X2: test_X2, y: test_y})
 
-                # Unnormalize data
-                test_pred = np.multiply(test_pred, min_max_normalization.denominator[0, 0])
-                test_pred = test_pred + min_max_normalization.col_min[0, 0]
-
-                actual_labels = np.multiply(test_y, min_max_normalization.denominator[0, 0])
-                actual_labels = actual_labels + min_max_normalization.col_min[0, 0]
-
-                test_loss = np.sqrt(np.mean(np.square(np.subtract(actual_labels, test_pred))))
+                test_loss = np.sqrt(np.mean(np.square(np.subtract(test_y, test_pred))))
 
                 print('Epoch: {} | Loss: {:2f} | Train Error: {:2f} | Test Error: {:2f}'.format(epoch,
                                                                                                 current_loss,
@@ -232,23 +207,11 @@ with tf.Session() as sess:
     # Predictions
     predictions = sess.run(z, feed_dict={X1: test_X1, X2: test_X2, y: test_y})
 
-    # Unnormalize data
-    predictions = np.multiply(predictions, min_max_normalization.denominator[0, 0])
-    predictions = predictions + min_max_normalization.col_min[0, 0]
-
-    test_y = np.multiply(test_y, min_max_normalization.denominator[0, 0])
-    test_y = test_y + min_max_normalization.col_min[0, 0]
-
     # RMSE & MAE Calc
     RMSE_loss = np.sqrt(np.mean(np.square(np.subtract(test_y, predictions))))
     MAE_loss = np.mean(np.abs(np.subtract(test_y, predictions)))
 
     print('RMSE: {} | MAE: {}'.format(RMSE_loss, MAE_loss))
-
-    # Pickle normalization
-    pickle_out = open('normalization/ls.pickle', 'wb')
-    pickle.dump(min_max_normalization, pickle_out)
-    pickle_out.close()
 
     """
     Plotting LoL
@@ -257,8 +220,6 @@ with tf.Session() as sess:
     time_start = 1
     time_end = 3000
 
-    raw_data = min_max_normalization(raw_data)
-
     # Reshape the data for tensorflow
     plot_x1 = raw_data[time_start:time_end, 1:11].reshape(-1, 10)
     plot_x2 = raw_data[time_start:time_end, 11:].reshape(-1, 3)
@@ -266,13 +227,6 @@ with tf.Session() as sess:
 
     # Run tensorflow model to get predicted y
     preds = sess.run(z, feed_dict={X1: plot_x1, X2: plot_x2})
-
-    # Normalization
-    preds = np.multiply(preds, min_max_normalization.denominator[0, 0])
-    preds = preds + min_max_normalization.col_min[0, 0]
-
-    plot_y = np.multiply(plot_y, min_max_normalization.denominator[0, 0])
-    plot_y = plot_y + min_max_normalization.col_min[0, 0]
 
     # RMSE & MAE Calc
     rmse_loss = np.sqrt(np.mean(np.square(np.subtract(plot_y, preds))))
@@ -302,3 +256,4 @@ with tf.Session() as sess:
     plt.legend(loc=0, frameon=False)
 
     plt.show()
+
