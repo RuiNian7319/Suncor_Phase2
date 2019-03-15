@@ -51,7 +51,7 @@ parser = argparse.ArgumentParser(description="Inputs to the linear regression")
 path = '/home/rui/Documents/Willowglen/data/Optimization_Data/'
 
 # Arguments
-parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Opti_withAllChangableDenCurv3.csv')
+parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Opti_withAllChangablev2.csv')
 parser.add_argument("--train_size", help="% of whole data set used for training", default=0.95)
 parser.add_argument('--lr', help="learning rate for the linear regression", default=0.003)
 parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=512)
@@ -234,7 +234,7 @@ with tf.Session() as sess:
     print('RMSE: {} | MAE: {}'.format(RMSE_loss, MAE_loss))
 
     # Visualization of what it looks like
-    seq_pred(sess, z, x, raw_data, min_max_normalization, 0, 5000, adv_plot=False)
+    seq_pred(sess, z, x, raw_data, min_max_normalization, 0, 3000, adv_plot=False)
 
     # Pickle normalization
     pickle_out = open('normalization/ls.pickle', 'wb')

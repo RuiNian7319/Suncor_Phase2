@@ -1,5 +1,5 @@
 """
-Linear Regression Patch 1.1
+1st Principle pipeline model Patch 1.1
 
 Patch notes:
 
@@ -132,7 +132,7 @@ with tf.name_scope("Model"):
     # tf.summary.histogram("Biases", b)
 
 # 1st Principle Model
-z = tf.divide(tf.matmul(X_pump, W_pump), W_inter + 9.81 * 100) + tf.matmul(X_dra, W_dra) + b
+z = tf.divide(tf.divide(tf.matmul(X_pump, W_pump), W_inter + 9.81 * 152) + tf.matmul(X_dra, W_dra) + b, 6.29)
 
 # Cross entropy with logits, assumes inputs are logits before cross entropy
 loss = tf.reduce_mean(tf.losses.mean_squared_error(labels=y, predictions=z))

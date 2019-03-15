@@ -20,6 +20,11 @@ Opti_withAllChangableDenCur: Includes all changable, density, and vfd currents
 Opti_withAllChangableDenCurv2: Includes all changable, density, and Fort Lupton vfd current
 Opti_withAllChangableDenCurv3: Includes all changable (no pressures), density, and vfd currents
 
+Opti_withAllChangable: Includes all changable (density, ppm merged & smoothed), and vfd currents
+Opti_withAllChangablev2: Includes all changable (density, ppm merged), and vfd currents
+
+Opti_1stPrinc: Dataset for 1st principle modelling.  2x dra, 2x vfd, 4x pump
+
 # Important findings
 1. Fort Lupton pressure reading is 90% correlated with pressure.
 2. Density increases prediction accuracy
@@ -219,4 +224,24 @@ MAE: 136
 Linear Regression w/ intercept un-normalized, with Constraint (Opti_withAllChangableDenCurv3):
 RMSE: 183
 MAE: 136
+
+Model with dra ppm merged and smoothed
+
+Linear Regression w/ intercept normalized (Opti_withAllChangable):
+RMSE: 188
+MAE: 140
+
+Linear Regression w/ intercept normalized and constrained (Opti_withAllChangable):
+RMSE: 195
+MAE: 96
+
+Linear Regression w/ intercept normalized (Opti_withAllChangablev2):
+RMSE: 190
+MAE: 140
+
+Linear Regression w/ intercept normalized and constrained (Opti_withAllChangablev2):
+RMSE: 195
+MAE: 142
+
+
 

@@ -55,7 +55,7 @@ parser.add_argument("--data", help="Data to be loaded into the model", default=p
 parser.add_argument("--train_size", help="% of whole data set used for training", default=0.95)
 parser.add_argument('--lr', help="learning rate for the linear regression", default=0.003)
 parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=1024)
-parser.add_argument("--epochs", help="Number of times data should be recycled through", default=2000)
+parser.add_argument("--epochs", help="Number of times data should be recycled through", default=1000)
 parser.add_argument("--tensorboard_path", help="Location of saved tensorboard information", default="./tensorboard")
 parser.add_argument("--model_path", help="Location of saved tensorflow graph", default='checkpoints/ls.ckpt')
 parser.add_argument("--save_graph", help="Save the current tensorflow computational graph", default=True)

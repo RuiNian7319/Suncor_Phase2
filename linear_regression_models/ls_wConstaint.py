@@ -51,7 +51,7 @@ parser = argparse.ArgumentParser(description="Inputs to the linear regression")
 path = '/home/rui/Documents/Willowglen/data/Optimization_Data/'
 
 # Arguments
-parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Opti_withAllChangableDenCurv3.csv')
+parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Opti_withAllChangablev2.csv')
 parser.add_argument("--train_size", help="% of whole data set used for training", default=0.95)
 parser.add_argument('--lr', help="learning rate for the linear regression", default=0.003)
 parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=512)
@@ -94,11 +94,11 @@ training_data = min_max_normalization(np.concatenate([train_y, train_X], axis=1)
 testing_data = min_max_normalization(np.concatenate([test_y, test_X], axis=1))
 
 # X1: Constrained, strictly positive weights  X2: Unconstrained weights
-train_X1 = training_data[:, 1:11].reshape(-1, 10)
-train_X2 = training_data[:, 11:].reshape(-1, 3)
+train_X1 = training_data[:, 1:9].reshape(-1, 8)
+train_X2 = training_data[:, 9:].reshape(-1, 3)
 
-test_X1 = testing_data[:, 1:11].reshape(-1, 10)
-test_X2 = testing_data[:, 11:].reshape(-1, 3)
+test_X1 = testing_data[:, 1:9].reshape(-1, 8)
+test_X2 = testing_data[:, 9:].reshape(-1, 3)
 
 train_y = training_data[:, 0].reshape(-1, 1)
 test_y = testing_data[:, 0].reshape(-1, 1)
@@ -254,14 +254,14 @@ with tf.Session() as sess:
     Plotting LoL
     """
 
-    time_start = 1
-    time_end = 3000
+    time_start = 5000
+    time_end = 8000
 
     raw_data = min_max_normalization(raw_data)
 
     # Reshape the data for tensorflow
-    plot_x1 = raw_data[time_start:time_end, 1:11].reshape(-1, 10)
-    plot_x2 = raw_data[time_start:time_end, 11:].reshape(-1, 3)
+    plot_x1 = raw_data[time_start:time_end, 1:9].reshape(-1, 8)
+    plot_x2 = raw_data[time_start:time_end, 9:].reshape(-1, 3)
     plot_y = raw_data[time_start:time_end, 0].reshape(-1, 1)
 
     # Run tensorflow model to get predicted y
@@ -295,7 +295,7 @@ with tf.Session() as sess:
     df = pd.DataFrame(group, columns=['time', 'predictions'])
 
     sns.lineplot(x='time', y='predictions', data=df)
-    plt.plot(plot_y[time_start:time_end], label='Actual')
+    plt.plot(plot_y, label='Actual')
 
     plt.xlabel('Time')
     plt.ylabel('Flow rate')
