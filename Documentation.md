@@ -189,5 +189,25 @@ Building pressure constraint models
 Linear Regression w/ intercept non-normalized (Chey_Pres):
 Ran for 1000 epochs.
 RMSE: 130
-MAE: 
+MAE: 88
+
+### March 14th
+Build 5 models:
+1. LP DRA $/ppm as a function of flow rate
+2. EP DRA $/ppm as a function of flow rate
+3. Average DRA $/ppm as a function of flow rate
+4. Pressure from current & inlet pressure at Cheyenne
+5. Pressure from current at Fort Lupton
+
+The three DRA $/ppm are finished, done using Excel, accuracy is high.
+
+Linear Regression w/ intercept non-normalized (Cur2Pres_Chey):
+RMSE: 96
+MAE: 76
+
+Linear Regression w/ intercept non-normalized (Cur2Pres_FL):
+RMSE: 30
+MAE: 22
+
+
 

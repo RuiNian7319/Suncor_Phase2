@@ -53,7 +53,7 @@ parser = argparse.ArgumentParser(description="Inputs to the linear regression")
 path = '/home/rui/Documents/Willowglen/data/PresCur_Data/'
 
 # Arguments
-parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Cur2Pres_Chey.csv')
+parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Cur2Pres_FL.csv')
 parser.add_argument("--train_size", help="% of whole data set used for training", default=0.95)
 parser.add_argument('--lr', help="learning rate for the linear regression", default=0.003)
 parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=1024)
@@ -202,5 +202,5 @@ with tf.Session() as sess:
     print('RMSE: {} | MAE: {}'.format(RMSE_loss, MAE_loss))
 
     # Visualization of what it looks like
-    seq_pred(session=sess, model=z, features=x, normalizer=None, data=raw_data, time_start=1, time_end=5000,
+    seq_pred(session=sess, model=z, features=x, normalizer=None, data=raw_data, time_start=1, time_end=2500,
              adv_plot=False, xlabel='Time', ylabel='Discharge Pressure')
