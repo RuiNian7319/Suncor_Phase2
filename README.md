@@ -14,3 +14,4 @@
 **EWMA**: Exponentially weighted moving average code.  Used for exponentially smoothing data. <br>
 **MinMaxNorm**: Min-Max normalization. $x_{norm} = \frac{x_i - x_{min}}{x_{max} - x_{min]}$ <br>
 **Seq_plot**: Sequential plot definition to validate the machine learning models in production <br>
+**DRA_Curves**: DRA Cost curves <br>
