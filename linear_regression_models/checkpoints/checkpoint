@@ -1,2 +1,2 @@
-model_checkpoint_path: "ls.ckpt"
-all_model_checkpoint_paths: "ls.ckpt"
+model_checkpoint_path: "ls_ConstNoNorm.ckpt"
+all_model_checkpoint_paths: "ls_ConstNoNorm.ckpt"

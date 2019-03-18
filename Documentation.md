@@ -21,7 +21,7 @@ Opti_withAllChangableDenCurv2: Includes all changable, density, and Fort Lupton 
 Opti_withAllChangableDenCurv3: Includes all changable (no pressures), density, and vfd currents
 
 Opti_withAllChangable: Includes all changable (density, ppm merged & smoothed), and vfd currents
-Opti_withAllChangablev2: Includes all changable (density, ppm merged), and vfd currents
+Opti_withAllChangablev2: Includes all changable (density, ppm merged, non-smoothed), and vfd currents
 
 Opti_1stPrinc: Dataset for 1st principle modelling.  2x dra, 2x vfd, 4x pump
 
@@ -242,6 +242,20 @@ MAE: 140
 Linear Regression w/ intercept normalized and constrained (Opti_withAllChangablev2):
 RMSE: 195
 MAE: 142
+
+### March 15th
+Build 1st principle model
+- Requires a lot longer to train
+
+First principles performs a lot worse
+
+Linear Regression 1st principle (Opti_1stPrinc):
+RMSE: 250
+MAE: 200
+
+Linear Regression 1st principle, no normalization (Opti_1stPrinc):
+RMSE: 254
+MAE: 203
 
 
 

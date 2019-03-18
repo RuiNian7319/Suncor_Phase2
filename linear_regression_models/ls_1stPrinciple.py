@@ -51,15 +51,15 @@ parser = argparse.ArgumentParser(description="Inputs to the linear regression")
 path = '/home/rui/Documents/Willowglen/data/Optimization_Data/'
 
 # Arguments
-parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Opti_withAllChangableDenCurv3.csv')
+parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Opti_1stPrinc.csv')
 parser.add_argument("--train_size", help="% of whole data set used for training", default=0.95)
 parser.add_argument('--lr', help="learning rate for the linear regression", default=0.003)
-parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=512)
-parser.add_argument("--epochs", help="Number of times data should be recycled through", default=30)
+parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=4096)
+parser.add_argument("--epochs", help="Number of times data should be recycled through", default=1000)
 parser.add_argument("--tensorboard_path", help="Location of saved tensorboard information", default="./tensorboard")
-parser.add_argument("--model_path", help="Location of saved tensorflow graph", default='checkpoints/ls.ckpt')
+parser.add_argument("--model_path", help="Location of saved tensorflow graph", default='checkpoints/ls_1stPrinc.ckpt')
 parser.add_argument("--save_graph", help="Save the current tensorflow computational graph", default=True)
-parser.add_argument("--restore_graph", help="Reload model parameters from saved location", default=False)
+parser.add_argument("--restore_graph", help="Reload model parameters from saved location", default=True)
 
 # Test Model
 parser.add_argument("--test", help="put as true if you want to test the current model", default=False)
@@ -93,8 +93,21 @@ min_max_normalization = MinMaxNormalization(np.concatenate([train_y, train_X], a
 training_data = min_max_normalization(np.concatenate([train_y, train_X], axis=1))
 testing_data = min_max_normalization(np.concatenate([test_y, test_X], axis=1))
 
-train_X = training_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
-test_X = testing_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
+# Data partitioning for 1st principle model
+# DRA
+train_X1 = training_data[:, 1:3].reshape(-1, 2)
+test_X1 = testing_data[:, 1:3].reshape(-1, 2)
+DRA_size = 2
+
+# VFD
+train_X2 = training_data[:, 3:5].reshape(-1, 2)
+test_X2 = testing_data[:, 3:5].reshape(-1, 2)
+VFD_size = 2
+
+# Pump
+train_X3 = training_data[:, 5:].reshape(-1, 4)
+test_X3 = testing_data[:, 5:].reshape(-1, 4)
+Pump_size = 4
 
 train_y = training_data[:, 0].reshape(-1, 1)
 test_y = testing_data[:, 0].reshape(-1, 1)
@@ -111,28 +124,38 @@ epochs = Args['epochs']
 assert(not np.isnan(train_X).any())
 assert(not np.isnan(test_X).any())
 
+# Model constants
+with tf.name_scope("Constants"):
+    gravity = tf.constant(9.81, dtype=tf.float32, shape=[1, 1])
+    head = tf.constant(152, dtype=tf.float32, shape=[1, 1])
+    convert = tf.constant(6.29, dtype=tf.float32, shape=[1, 1])
+
 # Model placeholders
 with tf.name_scope("Inputs"):
-    X_pump = tf.placeholder(dtype=tf.float32, shape=[None, input_size])
-    X_dra = tf.placeholder(dtype=tf.float32, shape=[None, input_size])
+    X_vfd = tf.placeholder(dtype=tf.float32, shape=[None, VFD_size])
+    X_pump = tf.placeholder(dtype=tf.float32, shape=[None, Pump_size])
+    X_dra = tf.placeholder(dtype=tf.float32, shape=[None, DRA_size])
     y = tf.placeholder(dtype=tf.float32, shape=[None, output_size])
 
 # Model variables
 with tf.name_scope("Model"):
     with tf.variable_scope("Weights"):
-        W_pump = tf.get_variable('Pump W', shape=[input_size, 1], initializer=tf.contrib.layers.xavier_initializer())
-        W_inter = tf.get_variable('Internal W', shape=[input_size, 1],
-                                  initializer=tf.contrib.layers.xavier_initializer())
-        W_dra = tf.get_variable('DRA W', shape=[input_size, 1], initializer=tf.contrib.layers.xavier_initializer())
+        W_vfd = tf.get_variable('VFD_W', shape=[VFD_size, 1], initializer=tf.contrib.layers.xavier_initializer())
+        W_pump = tf.get_variable('Pump_W', shape=[Pump_size, 1], initializer=tf.contrib.layers.xavier_initializer())
+        W_U = tf.get_variable('U_W', shape=[1, 1], initializer=tf.contrib.layers.xavier_initializer())
+        W_dra = tf.get_variable('DRA_W', shape=[DRA_size, 1], initializer=tf.contrib.layers.xavier_initializer())
         b = tf.get_variable('Biases', shape=[1, 1], initializer=tf.contrib.layers.xavier_initializer())
 
-    # tf.summary.histogram("Pump W", W_pump)
-    # tf.summary.histogram("Internal W", W_inter)
-    # tf.summary.histogram("DRA W", W_dra)
+    # tf.summary.histogram("VFD_W", W_vfd)
+    # tf.summary.histogram("Pump_W", W_pump)
+    # tf.summary.histogram("Internal_Energy W", W_U)
+    # tf.summary.histogram("DRA_W", W_dra)
     # tf.summary.histogram("Biases", b)
 
 # 1st Principle Model
-z = tf.divide(tf.divide(tf.matmul(X_pump, W_pump), W_inter + 9.81 * 152) + tf.matmul(X_dra, W_dra) + b, 6.29)
+model = tf.divide(tf.matmul(X_vfd, W_vfd) + tf.matmul(X_pump, W_pump),
+                  W_U + gravity * head) + tf.matmul(X_dra, W_dra) + b
+z = tf.multiply(model, convert)
 
 # Cross entropy with logits, assumes inputs are logits before cross entropy
 loss = tf.reduce_mean(tf.losses.mean_squared_error(labels=y, predictions=z))
@@ -165,12 +188,26 @@ with tf.Session() as sess:
 
             # Generate mini_batch indexing
             batch_index = i * mini_batch_size
-            minibatch_train_X = train_X[batch_index:(batch_index + mini_batch_size), :]
+            minibatch_train_X1 = train_X1[batch_index:(batch_index + mini_batch_size), :]
+            minibatch_train_X2 = train_X2[batch_index:(batch_index + mini_batch_size), :]
+            minibatch_train_X3 = train_X3[batch_index:(batch_index + mini_batch_size), :]
+
             minibatch_train_y = train_y[batch_index:(batch_index + mini_batch_size), :]
 
-            _ = sess.run(optimizer, feed_dict={x: minibatch_train_X, y: minibatch_train_y})
-            # summary = sess.run(merge, feed_dict={x: minibatch_train_X, y: minibatch_train_y})
-            current_loss = sess.run(loss, feed_dict={x: minibatch_train_X, y: minibatch_train_y})
+            _ = sess.run(optimizer, feed_dict={X_dra: minibatch_train_X1,
+                                               X_vfd: minibatch_train_X2,
+                                               X_pump: minibatch_train_X3,
+                                               y: minibatch_train_y})
+
+            # summary = sess.run(merge, feed_dict={X_dra: minibatch_train_X1,
+            #                                      X_vfd: minibatch_train_X2,
+            #                                      X_pump: minibatch_train_X3,
+            #                                      y: minibatch_train_y})
+
+            current_loss = sess.run(loss, feed_dict={X_dra: minibatch_train_X1,
+                                                     X_vfd: minibatch_train_X2,
+                                                     X_pump: minibatch_train_X3,
+                                                     y: minibatch_train_y})
 
             loss_history.append(current_loss)
 
@@ -184,7 +221,10 @@ with tf.Session() as sess:
                 Train data
                 """
 
-                train_pred = sess.run(z, feed_dict={x: train_X, y: train_y})
+                train_pred = sess.run(z, feed_dict={X_dra: train_X1,
+                                                    X_vfd: train_X2,
+                                                    X_pump: train_X3,
+                                                    y: train_y})
 
                 # Unnormalize data
                 train_pred = np.multiply(train_pred, min_max_normalization.denominator[0, 0])
@@ -199,7 +239,10 @@ with tf.Session() as sess:
                 Test data
                 """
 
-                test_pred = sess.run(z, feed_dict={x: test_X, y: test_y})
+                test_pred = sess.run(z, feed_dict={X_dra: test_X1,
+                                                   X_vfd: test_X2,
+                                                   X_pump: test_X3,
+                                                   y: test_y})
 
                 # Unnormalize data
                 test_pred = np.multiply(test_pred, min_max_normalization.denominator[0, 0])
@@ -220,27 +263,30 @@ with tf.Session() as sess:
         print("Model was saved in {}".format(save_path))
 
     # Output weights
-    weights = sess.run(W)
+    weights_dra = sess.run(W_dra)
+    weights_vfd = sess.run(W_vfd)
+    weights_pump = sess.run(W_pump)
+    weights_U = sess.run(W_U)
     biases = sess.run(b)
 
     # Predictions
-    predictions = sess.run(z, feed_dict={x: train_X, y: train_y})
+    predictions = sess.run(z, feed_dict={X_dra: test_X1,
+                                         X_vfd: test_X2,
+                                         X_pump: test_X3,
+                                         y: test_y})
 
     # Unnormalize data
     predictions = np.multiply(predictions, min_max_normalization.denominator[0, 0])
     predictions = predictions + min_max_normalization.col_min[0, 0]
 
-    train_X = np.multiply(train_y, min_max_normalization.denominator[0, 0])
-    train_X = train_X + min_max_normalization.col_min[0, 0]
+    test_y = np.multiply(test_y, min_max_normalization.denominator[0, 0])
+    test_y = test_y + min_max_normalization.col_min[0, 0]
 
     # RMSE & MAE Calc
-    RMSE_loss = np.sqrt(np.mean(np.square(np.subtract(train_X, predictions))))
-    MAE_loss = np.mean(np.abs(np.subtract(train_X, predictions)))
+    RMSE_loss = np.sqrt(np.mean(np.square(np.subtract(test_y, predictions))))
+    MAE_loss = np.mean(np.abs(np.subtract(test_y, predictions)))
 
     print('RMSE: {} | MAE: {}'.format(RMSE_loss, MAE_loss))
-
-    # Visualization of what it looks like
-    seq_pred(sess, z, x, raw_data, min_max_normalization, 0, 5000, adv_plot=False)
 
     # Pickle normalization
     pickle_out = open('normalization/ls.pickle', 'wb')
