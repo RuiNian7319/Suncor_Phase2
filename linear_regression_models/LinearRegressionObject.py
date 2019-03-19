@@ -1,5 +1,5 @@
 """
-Linear Regression Object
+Linear Regression Object v1.0
 
 Rui Nian
 
@@ -274,17 +274,110 @@ class LinearRegression:
 
     @staticmethod
     def eval_loss(pred, actual):
-        loss = np.sqrt(np.mean(np.square(np.subtract(pred, actual))))
+        """
+        Description
+           ---
+              Evaluates RMSE and MAE loss outside the session
 
 
-        return loss
+        Inputs
+           ---
+                  pred: Features of the machine learning model (X)
+                actual: Targets / Labels of the machine learning model (y)
+
+
+        Returns
+           ---
+                  rmse: Root mean squared error
+                   mae: Mean absolute error
+
+        """
+        error = np.subtract(pred, actual)
+        sq_error = np.square(error)
+        mean_sq_error = np.mean(sq_error)
+        rmse = np.sqrt(mean_sq_error)
+
+        abs_error = np.abs(error)
+        mae = np.mean(abs_error)
+
+        return rmse, mae
+
+
+def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=64,
+               train_size=0.9, epochs=5, lambd=0.001, testing=False):
+    """
+    Description
+       ---
+          Evaluates RMSE and MAE loss outside the session
+
+
+    Inputs
+       ---
+              pred: Features of the machine learning model (X)
+            actual: Targets / Labels of the machine learning model (y)
+
+
+    Returns
+       ---
+              rmse: Root mean squared error
+               mae: Mean absolute error
+
+    """
+
+    raw_data = pd.read_csv(data_path)
+
+    heading_names = list(raw_data)
+    raw_data = raw_data.values
+
+    print('There are {} feature(s) and {} label(s) with {} examples.'.format(raw_data.shape[1] - 1, 1,
+                                                                             raw_data.shape[0]))
+
+    # Train / Test split
+    train_X, test_X, train_y, test_y = train_test_split(raw_data[:, 1:], raw_data[:, 0],
+                                                        test_size=test_size, shuffle=shuffle, random_state=42)
+
+    # Reshape for TensorFlow
+    train_X.reshape(-1, raw_data.shape[1] - 1)
+    test_X.reshape(-1, raw_data.shape[1] - 1)
+
+    train_y.reshape(-1, 1)
+    test_y.reshape(-1, 1)
+
+    # Normalization
+    if testing:
+        min_max_normalization = load(norm_path)
+
+    else:
+        min_max_normalization = MinMaxNormalization(np.concatenate([train_y, train_X], axis=1))
+
+    training_data = min_max_normalization(np.concatenate([train_y, train_X], axis=1))
+    testing_data = min_max_normalization(np.concatenate([test_y, test_X], axis=1))
+
+    # Reshape for TensorFlow
+    train_X = training_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
+    test_X = testing_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
+
+    train_y = training_data[:, 0].reshape(-1, 1)
+    test_y = testing_data[:, 0].reshape(-1, 1)
+
+    # Test cases for NaN values
+    assert(not np.isnan(train_X).any())
+    assert(not np.isnan(test_X).any())
+
+    assert(not np.isnan(train_y).any())
+    assert(not np.isnan(test_y).any())
+
+    return raw_data, heading_names
 
 
 if __name__ == "__main__":
 
-    # Specify data, model and normalization paths
-    data_path = '/home/rui/Documents/Willowglen/data/Optimization_Data/Opti_withAllChangable.csv'
-    model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/checkpoints/ls.ckpt'
-    norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/normalization/ls.pickle'
-
+    # Seed NumPy and TensorFlow with the meaning of life
     random_seed(42)
+
+    # Specify data, model and normalization paths
+    Data_path = '/home/rui/Documents/Willowglen/data/Optimization_Data/Opti_withAllChangable.csv'
+    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/checkpoints/ls.ckpt'
+    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/normalization/ls.pickle'
+
+    Raw_data, Heading_names = simulation(Data_path, Model_path, Norm_path)
