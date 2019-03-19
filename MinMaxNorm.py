@@ -74,6 +74,26 @@ class MinMaxNormalization:
 
         return data
 
+    def unnormalize_y(self, data):
+        """
+        Description
+            -----
+                Un-normalizes the labels only.  Label must be the first column when building the normalization object.
+
+        Inputs
+            -----
+               Data:  Data to be unnormalized.  In shape [Y | X]
+
+        Returns
+            -----
+               Data:  unormalized data.  In shape [Y | X]
+        """
+
+        data = np.multiply(data, self.denominator[0, 0])
+        data = data + self.col_min[0, 0]
+
+        return data
+
 
 if __name__ == "__main__":
 

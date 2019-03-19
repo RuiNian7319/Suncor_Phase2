@@ -152,9 +152,9 @@ class LinearRegression:
         self.train_y = train_y
         self.test_y = test_y
 
-        self.nx = train_X.shape[1]
+        self.nx = train_x.shape[1]
         self.ny = 1
-        self.m = train_X.shape[0]
+        self.m = train_x.shape[0]
         self.train_size = train_size
 
         # Machine Learning Parameters
@@ -167,12 +167,12 @@ class LinearRegression:
 
         # Tensorflow variables
         self.X = tf.placeholder(dtype=tf.float32, shape=[None, self.nx])
-        self.y = tf.paceholder(dtype=tf.float32, shape=[None, self.ny])
+        self.y = tf.placeholder(dtype=tf.float32, shape=[None, self.ny])
 
-        self.W = tf.get_variables('Weights', shape=[self.ny, self.nx],
-                                  initializer=tf.contrib.layers.xavier_initializer())
+        self.W = tf.get_variable('Weights', shape=[self.nx, self.ny],
+                                 initializer=tf.contrib.layers.xavier_initializer())
 
-        self.b = tf.get_variables('Biases', shape=[self.ny, 1], initializer=constant_initializer())
+        self.b = tf.get_variable('Biases', shape=[1, self.ny], initializer=tf.constant_initializer())
 
         # Model
         self.z = tf.matmul(self.X, self.W) + self.b
@@ -183,7 +183,7 @@ class LinearRegression:
                                    self.lambd * self.regularizer)
 
         # Optimization, Adaptive Momentum Gradient Descent
-        self.optimizer = tf.train.AdamOptimizer(learning_rate=lr).minimize(loss)
+        self.optimizer = tf.train.AdamOptimizer(learning_rate=lr).minimize(self.loss)
 
         # Initializations & saving
         self.init = tf.global_variables_initializer()
@@ -303,8 +303,8 @@ class LinearRegression:
         return rmse, mae
 
 
-def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=64,
-               train_size=0.9, epochs=5, lambd=0.001, testing=False):
+def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=2048,
+               train_size=0.9, epochs=30, lambd=0.001, testing=False):
     """
     Description
        ---
@@ -337,11 +337,11 @@ def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, l
                                                         test_size=test_size, shuffle=shuffle, random_state=42)
 
     # Reshape for TensorFlow
-    train_X.reshape(-1, raw_data.shape[1] - 1)
-    test_X.reshape(-1, raw_data.shape[1] - 1)
+    train_X = train_X.reshape(-1, raw_data.shape[1] - 1)
+    test_X = test_X.reshape(-1, raw_data.shape[1] - 1)
 
-    train_y.reshape(-1, 1)
-    test_y.reshape(-1, 1)
+    train_y = train_y.reshape(-1, 1)
+    test_y = test_y.reshape(-1, 1)
 
     # Normalization
     if testing:
@@ -354,20 +354,79 @@ def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, l
     testing_data = min_max_normalization(np.concatenate([test_y, test_X], axis=1))
 
     # Reshape for TensorFlow
-    train_X = training_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
-    test_X = testing_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
+    train_x = training_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
+    test_x = testing_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
 
     train_y = training_data[:, 0].reshape(-1, 1)
     test_y = testing_data[:, 0].reshape(-1, 1)
 
     # Test cases for NaN values
-    assert(not np.isnan(train_X).any())
-    assert(not np.isnan(test_X).any())
+    assert(not np.isnan(train_x).any())
+    assert(not np.isnan(test_x).any())
 
     assert(not np.isnan(train_y).any())
     assert(not np.isnan(test_y).any())
 
-    return raw_data, heading_names
+    with tf.Session() as sess:
+
+        # Build linear regression object
+        linear_reg = LinearRegression(sess, train_x, train_y, test_x, test_y, lr=lr, minibatch_size=minibatch_size,
+                                      train_size=train_size, epochs=epochs, lambd=lambd)
+
+        # If testing, just run it
+        if testing:
+            # Restore model
+            linear_reg.saver.restore(sess, save_path=model_path)
+
+            # Pred testing values
+            pred = linear_reg.test(test_X)
+
+            # Evaluate loss
+            rmse, mae = linear_reg.eval_loss(pred, test_y)
+
+            print('Test RMSE: {} | Test MAE: {}'.format(rmse, mae))
+
+        else:
+            # Global variables initializer
+            sess.run(linear_reg.init)
+
+            for epoch in range(epochs):
+
+                for i in range(linear_reg.total_batch_number):
+
+                    # Mini-batch gradient descent
+                    batch_index = i * linear_reg.minibatch_size
+                    minibatch_x = train_x[batch_index:batch_index + linear_reg.minibatch_size, :]
+                    minibatch_y = train_y[batch_index:batch_index + linear_reg.minibatch_size, :]
+
+                    # Optimize machine learning model
+                    linear_reg.train(features=minibatch_x, labels=minibatch_y)
+
+                    # Record loss
+                    if i % 10 == 0:
+                        _ = linear_reg.loss_check(features=train_x, labels=train_y)
+
+                    # Evaluate train and test losses
+                    if i % 150 == 0:
+                        current_loss = linear_reg.loss_check(features=train_x, labels=train_y)
+
+                        train_pred = linear_reg.test(features=train_x)
+
+                        # Unnormalize data
+
+                        train_rmse, _ = linear_reg.eval_loss(train_pred, train_y)
+
+                        test_pred = linear_reg.test(features=test_x)
+
+                        # Unnormalize data
+
+                        test_rmse, _ = linear_reg.eval_loss(test_pred, test_y)
+
+                        print('Loss: {} | Train RMSE: {} | Test RMSE: {}'.format(current_loss, train_rmse, test_rmse))
+
+
+
+    return raw_data, heading_names, linear_reg
 
 
 if __name__ == "__main__":
@@ -380,4 +439,4 @@ if __name__ == "__main__":
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/checkpoints/ls.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/normalization/ls.pickle'
 
-    Raw_data, Heading_names = simulation(Data_path, Model_path, Norm_path)
+    Raw_data, Heading_names, Linear_reg = simulation(Data_path, Model_path, Norm_path)

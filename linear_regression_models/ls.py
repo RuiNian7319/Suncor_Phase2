@@ -51,7 +51,7 @@ parser = argparse.ArgumentParser(description="Inputs to the linear regression")
 path = '/home/rui/Documents/Willowglen/data/Optimization_Data/'
 
 # Arguments
-parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Opti_withAllChangablev2.csv')
+parser.add_argument("--data", help="Data to be loaded into the model", default=path + 'Opti_withAllChangable.csv')
 parser.add_argument("--train_size", help="% of whole data set used for training", default=0.95)
 parser.add_argument('--lr', help="learning rate for the linear regression", default=0.003)
 parser.add_argument("--minibatch_size", help="mini batch size for mini batch gradient descent", default=512)
@@ -181,11 +181,8 @@ with tf.Session() as sess:
                 train_pred = sess.run(z, feed_dict={x: train_X, y: train_y})
 
                 # Unnormalize data
-                train_pred = np.multiply(train_pred, min_max_normalization.denominator[0, 0])
-                train_pred = train_pred + min_max_normalization.col_min[0, 0]
-
-                actual_labels = np.multiply(train_y, min_max_normalization.denominator[0, 0])
-                actual_labels = actual_labels + min_max_normalization.col_min[0, 0]
+                train_pred = min_max_normalization.unnormalize_y(train_pred)
+                actual_labels = min_max_normalization.unnormalize_y(train_y)
 
                 train_loss = np.sqrt(np.mean(np.square(np.subtract(actual_labels, train_pred))))
 
@@ -196,11 +193,8 @@ with tf.Session() as sess:
                 test_pred = sess.run(z, feed_dict={x: test_X, y: test_y})
 
                 # Unnormalize data
-                test_pred = np.multiply(test_pred, min_max_normalization.denominator[0, 0])
-                test_pred = test_pred + min_max_normalization.col_min[0, 0]
-
-                actual_labels = np.multiply(test_y, min_max_normalization.denominator[0, 0])
-                actual_labels = actual_labels + min_max_normalization.col_min[0, 0]
+                test_pred = min_max_normalization.unnormalize_y(test_pred)
+                actual_labels = min_max_normalization.unnormalize_y(test_y)
 
                 test_loss = np.sqrt(np.mean(np.square(np.subtract(actual_labels, test_pred))))
 
@@ -221,15 +215,12 @@ with tf.Session() as sess:
     predictions = sess.run(z, feed_dict={x: train_X, y: train_y})
 
     # Unnormalize data
-    predictions = np.multiply(predictions, min_max_normalization.denominator[0, 0])
-    predictions = predictions + min_max_normalization.col_min[0, 0]
-
-    train_X = np.multiply(train_y, min_max_normalization.denominator[0, 0])
-    train_X = train_X + min_max_normalization.col_min[0, 0]
+    predictions = min_max_normalization.unnormalize_y(predictions)
+    train_y = min_max_normalization.unnormalize_y(train_y)
 
     # RMSE & MAE Calc
-    RMSE_loss = np.sqrt(np.mean(np.square(np.subtract(train_X, predictions))))
-    MAE_loss = np.mean(np.abs(np.subtract(train_X, predictions)))
+    RMSE_loss = np.sqrt(np.mean(np.square(np.subtract(train_y, predictions))))
+    MAE_loss = np.mean(np.abs(np.subtract(train_y, predictions)))
 
     print('RMSE: {} | MAE: {}'.format(RMSE_loss, MAE_loss))
 
