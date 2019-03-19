@@ -333,12 +333,12 @@ def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, l
                                                                              raw_data.shape[0]))
 
     # Train / Test split
-    train_X, test_X, train_y, test_y = train_test_split(raw_data[:, 1:], raw_data[:, 0],
+    train_x, test_x, train_y, test_y = train_test_split(raw_data[:, 1:], raw_data[:, 0],
                                                         test_size=test_size, shuffle=shuffle, random_state=42)
 
     # Reshape for TensorFlow
-    train_X = train_X.reshape(-1, raw_data.shape[1] - 1)
-    test_X = test_X.reshape(-1, raw_data.shape[1] - 1)
+    train_x = train_x.reshape(-1, raw_data.shape[1] - 1)
+    test_x = test_x.reshape(-1, raw_data.shape[1] - 1)
 
     train_y = train_y.reshape(-1, 1)
     test_y = test_y.reshape(-1, 1)
@@ -348,10 +348,10 @@ def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, l
         min_max_normalization = load(norm_path)
 
     else:
-        min_max_normalization = MinMaxNormalization(np.concatenate([train_y, train_X], axis=1))
+        min_max_normalization = MinMaxNormalization(np.concatenate([train_y, train_x], axis=1))
 
-    training_data = min_max_normalization(np.concatenate([train_y, train_X], axis=1))
-    testing_data = min_max_normalization(np.concatenate([test_y, test_X], axis=1))
+    training_data = min_max_normalization(np.concatenate([train_y, train_x], axis=1))
+    testing_data = min_max_normalization(np.concatenate([test_y, test_x], axis=1))
 
     # Reshape for TensorFlow
     train_x = training_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
@@ -384,7 +384,7 @@ def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, l
             # Evaluate loss
             rmse, mae = linear_reg.eval_loss(pred, test_y)
 
-            print('Test RMSE: {} | Test MAE: {}'.format(rmse, mae))
+            print('Test RMSE: {:2f} | Test MAE: {:2f}'.format(rmse, mae))
 
         else:
             # Global variables initializer
@@ -413,18 +413,42 @@ def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, l
                         train_pred = linear_reg.test(features=train_x)
 
                         # Unnormalize data
+                        train_pred = min_max_normalization.unnormalize_y(train_pred)
+                        actual_y = min_max_normalization.unnormalize_y(train_y)
 
-                        train_rmse, _ = linear_reg.eval_loss(train_pred, train_y)
+                        # Evaluate error
+                        train_rmse, train_mae = linear_reg.eval_loss(train_pred, actual_y)
 
                         test_pred = linear_reg.test(features=test_x)
 
                         # Unnormalize data
+                        test_pred = min_max_normalization.unnormalize_y(test_pred)
+                        actual_y = min_max_normalization.unnormalize_y(test_y)
 
-                        test_rmse, _ = linear_reg.eval_loss(test_pred, test_y)
+                        test_rmse, test_mae = linear_reg.eval_loss(test_pred, actual_y)
 
-                        print('Loss: {} | Train RMSE: {} | Test RMSE: {}'.format(current_loss, train_rmse, test_rmse))
+                        print('Epoch: {} | Loss: {:2f} | Train RMSE: {:2f} | Test RMSE: {:2f}'.format(current_loss,
+                                                                                                      train_rmse,
+                                                                                                      test_rmse,
+                                                                                                      epoch))
 
+            # Save model
+            linear_reg.saver.save(sess, model_path)
+            print("Model saved at: {}".format(model_path))
 
+            # Save normalizer
+            save(min_max_normalization, norm_path)
+            print("Normalization saved at: {}".format(norm_path))
+
+            # Final test
+            test_pred = linear_reg.test(features=test_x)
+
+            # Unnormalize data
+            test_pred = min_max_normalization.unnormalize_y(test_pred)
+            actual_y = min_max_normalization.unnormalize_y(test_y)
+
+            test_rmse, test_mae = linear_reg.eval_loss(test_pred, actual_y)
+            print('Final Test Results:  Test RMSE: {} | Test MAE: {}'.format(test_rmse, test_mae))
 
     return raw_data, heading_names, linear_reg
 
