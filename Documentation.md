@@ -243,7 +243,7 @@ Linear Regression w/ intercept normalized and constrained (Opti_withAllChangable
 RMSE: 195
 MAE: 142
 
-### March 15th
+### March 18th
 Build 1st principle model
 - Requires a lot longer to train
 
@@ -257,5 +257,7 @@ Linear Regression 1st principle, no normalization (Opti_1stPrinc):
 RMSE: 254
 MAE: 203
 
+### March 19th
+Objectizing LS
 
 

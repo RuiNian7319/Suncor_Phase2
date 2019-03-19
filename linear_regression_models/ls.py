@@ -128,7 +128,7 @@ with tf.name_scope("Model"):
 # Model
 z = tf.matmul(x, W) + b
 
-# Cross entropy with logits, assumes inputs are logits before cross entropy
+# Mean squared error
 loss = tf.reduce_mean(tf.losses.mean_squared_error(labels=y, predictions=z))
 
 # Optimizer
