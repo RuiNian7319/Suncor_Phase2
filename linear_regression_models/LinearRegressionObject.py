@@ -466,5 +466,3 @@ if __name__ == "__main__":
     Raw_data, Heading_names, Linear_reg = simulation(Data_path, Model_path, Norm_path, test_size=0.05, shuffle=True, 
                                                      lr=0.003, minibatch_size=2048, train_size=0.9, epochs=30, lambd=0.001, 
                                                      testing=False)
-
-    
