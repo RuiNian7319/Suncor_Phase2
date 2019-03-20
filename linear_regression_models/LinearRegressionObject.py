@@ -378,12 +378,14 @@ def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, l
             linear_reg.saver.restore(sess, save_path=model_path)
 
             # Pred testing values
-            pred = linear_reg.test(test_X)
+            pred = linear_reg.test(test_x)
 
             # Evaluate loss
             rmse, mae = linear_reg.eval_loss(pred, test_y)
 
             print('Test RMSE: {:2f} | Test MAE: {:2f}'.format(rmse, mae))
+
+            weights_biases = linear_reg.weights_and_biases()
 
         else:
             # Global variables initializer
@@ -449,7 +451,9 @@ def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, l
             test_rmse, test_mae = linear_reg.eval_loss(test_pred, actual_y)
             print('Final Test Results:  Test RMSE: {} | Test MAE: {}'.format(test_rmse, test_mae))
 
-    return raw_data, heading_names, linear_reg
+            weights_biases = linear_reg.weights_and_biases()
+
+    return raw_data, heading_names, linear_reg, weights_biases
 
 
 if __name__ == "__main__":
@@ -463,5 +467,5 @@ if __name__ == "__main__":
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/normalization/ls.pickle'
 
     Raw_data, Heading_names, Linear_reg = simulation(Data_path, Model_path, Norm_path, test_size=0.05, shuffle=True, 
-                                                     lr=0.003, minibatch_size=2048, train_size=0.9, epochs=30, lambd=0.001, 
-                                                     testing=False)
+                                                     lr=0.003, minibatch_size=2048, train_size=0.9, epochs=30,
+                                                     lambd=0.001, testing=False)
