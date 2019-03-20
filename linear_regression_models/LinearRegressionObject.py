@@ -73,8 +73,8 @@ def save(obj, path):
           path: Location of where to save the pickle.
 
     """
-    pickle_out = open(obj, 'wb')
-    pickle.dump(pickle_out, path)
+    pickle_out = open(path, 'wb')
+    pickle.dump(obj, pickle_out)
     pickle_out.close()
 
 
@@ -95,8 +95,8 @@ def load(path):
            obj: Loaded pickle object.
 
     """
-    pickle_out = open(path, 'rb')
-    obj = pickle.load(pickle_out)
+    pickle_in = open(path, 'rb')
+    obj = pickle.load(pickle_in)
     return obj
 
 
