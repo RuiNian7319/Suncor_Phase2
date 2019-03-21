@@ -132,14 +132,46 @@ class NeuralNetwork:
 
     """
 
-    def __init__(self):
-        pass
-
     def __str__(self):
-        pass
+        return print('Three-layered feed forward neural network with [} inputs'.format(self.nx))
 
     def __repr__(self):
-        pass
+        return print('NeuralNetwork()')
+
+    def __init__(self, session, train_x, train_y, test_x, test_y, lr=0.003, minibatch_size=2048, train_size=0.9,
+                 epochs=5, lambd=0.001):
+
+        """
+        Notes: Input data are in shape [m, Nx]
+
+        """
+
+        # TensorFLow session
+        self.sess = session
+
+        # Machine Learning Data
+        self.train_X = train_x
+        self.test_X = test_x
+
+        self.train_y = train_y
+        self.test_y = test_y
+
+        self.nx = train_x.shape[1]
+        self.ny = 1
+        self.m = train_x.shape[0]
+        self.train_size = train_size
+
+        # Machine Learning Parameters
+        self.lr = lr
+        self.minibatch_size = minibatch_size
+        self.epochs = epochs
+        self.lambd = lambd
+
+        self.total_batch_number = int((self.m / self.minibatch_size) * self.train_size)
+
+
+
+
 
 
 if __name__ == "__main__":

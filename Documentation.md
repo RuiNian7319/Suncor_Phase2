@@ -272,4 +272,23 @@ Objectizing NN
 Building new data set: [Flow, DRA x4, On/off pumps, VFDs, Density]
 Taking only half the data to build a more accurate model.
 
+Linear Regression (Opti_withAllChangable):
+RMSE: 181
+MAE: 135
+
+Linear Regression (Opti_withAllChangableHalf):
+RMSE: 182
+MAE: 130
+
+Linear Regression - no Regularization (Opti_withAllChangableHalf):
+RMSE: 182
+MAE: 130
+
+Linear Regression Constrained (Opti_withAllChangable):
+RMSE: 181
+MAE: 136
+
+Linear Regression Constrained (Opti_withAllChangableHalf):
+RMSE: 181
+MAE: 131
 
