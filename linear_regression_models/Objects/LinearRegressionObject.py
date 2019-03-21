@@ -165,13 +165,15 @@ class LinearRegression:
         self.total_batch_number = int((self.m / self.minibatch_size) * self.train_size)
 
         # Tensorflow variables
-        self.X = tf.placeholder(dtype=tf.float32, shape=[None, self.nx])
-        self.y = tf.placeholder(dtype=tf.float32, shape=[None, self.ny])
+        with tf.name_scope('Inputs'):
+            self.X = tf.placeholder(dtype=tf.float32, shape=[None, self.nx])
+            self.y = tf.placeholder(dtype=tf.float32, shape=[None, self.ny])
 
-        self.W = tf.get_variable('Weights', shape=[self.nx, self.ny],
-                                 initializer=tf.contrib.layers.xavier_initializer())
+        with tf.name_scope('Model'):
+            self.W = tf.get_variable('Weights', shape=[self.nx, self.ny],
+                                     initializer=tf.contrib.layers.xavier_initializer())
 
-        self.b = tf.get_variable('Biases', shape=[1, self.ny], initializer=tf.constant_initializer())
+            self.b = tf.get_variable('Biases', shape=[1, self.ny], initializer=tf.constant_initializer())
 
         # Model
         self.z = tf.matmul(self.X, self.W) + self.b
@@ -302,24 +304,35 @@ class LinearRegression:
         return rmse, mae
 
 
-def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=2048,
-               train_size=0.9, epochs=30, lambd=0.001, testing=False):
+def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=2048,
+                epochs=30, lambd=0.001, testing=False):
     """
     Description
        ---
-          Evaluates RMSE and MAE loss outside the session
+          Trains a normalized (min-max) linear regression model, given the data from data_path.  Model will be saved
+          to model_path.  Advanced settings are set above.
 
 
     Inputs
        ---
-              pred: Features of the machine learning model (X)
-            actual: Targets / Labels of the machine learning model (y)
+              data_path: Path for the process data.  First column should be labels
+             model_path: Path for the model saving.
+              norm_path: Path for the normalization object.
+              test_size: Size
+                shuffle: Boolean, shuffle the data for training?  Breaks time correlation of data
+                     lr: Learning rate of the model, higher learning rate results in faster, more unstable learning.
+         minibatch_size: Size of batches for stochastic / minibatch gradient descent
+                 epochs:
+                  lambd:
+                testing:
 
 
     Returns
        ---
-              rmse: Root mean squared error
-               mae: Mean absolute error
+               raw_data:
+          heading_names:
+             linear_reg:
+         weights_biases:
 
     """
 
@@ -370,7 +383,7 @@ def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, l
 
         # Build linear regression object
         linear_reg = LinearRegression(sess, train_x, train_y, test_x, test_y, lr=lr, minibatch_size=minibatch_size,
-                                      train_size=train_size, epochs=epochs, lambd=lambd)
+                                      train_size=(1 - test_size), epochs=epochs, lambd=lambd)
 
         # If testing, just run it
         if testing:
@@ -482,7 +495,7 @@ if __name__ == "__main__":
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/Objects/checkpoints/ls.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/Objects/normalization/ls.pickle'
 
-    Raw_data, Heading_names, Linear_reg, Weights_biases = simulation(Data_path, Model_path, Norm_path, test_size=0.05,
-                                                                     shuffle=True, lr=0.003, minibatch_size=2048,
-                                                                     train_size=0.9, epochs=100, lambd=0.001,
-                                                                     testing=False)
+    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
+                                                                      shuffle=True, lr=0.003, minibatch_size=2048,
+                                                                      epochs=100, lambd=0.001,
+                                                                      testing=False)

@@ -169,6 +169,194 @@ class NeuralNetwork:
 
         self.total_batch_number = int((self.m / self.minibatch_size) * self.train_size)
 
+        # Neural Network Parameters
+        self.input_size = nx
+        self.h1_nodes = 30
+        self.h2_nodes = 30
+        self.h3_nodes = 30
+        self.output_size = 1
+
+        # TensorFlow placeholders
+        with tf.name_scope('Inputs'):
+            self.X = tf.placeholder(dtype=tf.float32, shape=[None, self.input_size])
+            self.y = tf.placeholder(dtype=tf.float32, shape=[None, self.output_size])
+
+        # Used for batch normalization
+        self.training = tf.placeholder(dtype=tf.bool, name='training')
+
+        # TensorFlow model variables
+        with tf.name_scope('Model'):
+            self.hidden_layer1 = {'W': tf.get_variable('h1_weights', shape=[self.input_size, self.h1_nodes],
+                                                       initializer=tf.contrib.layers.variance_scaling_initializer()),
+                                  'b': tf.get_variable('h1_bias', shape=[self.h1_nodes],
+                                                       initializer=tf.contrib.layers.variance_scaling_initializer())}
+
+            self.hidden_layer2 = {'W': tf.get_variable('h2_weights', shape=[self.h1_nodes, self.h2_nodes],
+                                                       initializer=tf.contrib.layers.variance_scaling_initializer()),
+                                  'b': tf.get_variable('h2_bias', shape=[self.h2_nodes],
+                                                       initializer=tf.contrib.layers.variance_scaling_initializer())}
+
+            self.hidden_layer3 = {'W': tf.get_variable('h3_weights', shape=[self.h2_nodes, self.h3_nodes],
+                                                       initializer=tf.contrib.layers.variance_scaling_initializer()),
+                                  'b': tf.get_variable('h3_bias', shape=[self.h3_nodes],
+                                                       initializer=tf.contrib.layers.variance_scaling_initializer())}
+
+            self.output_layer = {'W': tf.get_variable('output_weights', shape=[self.h3_nodes, self.output_size],
+                                                      initializer=tf.contrib.layers.variance_scaling_initializer()),
+                                 'b': tf.get_variable('output_bias', shape=[self.output_size],
+                                                      initializer=tf.contrib.layers.variance_scaling_initializer())}
+
+        self.l1 = tf.add(tf.matmul(self.X, self.hidden_layer1['W']), self.hidden_layer1['b'])
+        self.l1 = tf.nn.relu(self.l1)
+        self.l1 = tf.layers.batch_normalization(self.l1, training=self.training)
+
+        self.l2 = tf.add(tf.matmul(self.l1, self.hidden_layer2['W']), self.hidden_layer2['b'])
+        self.l2 = tf.nn.relu(self.l2)
+        self.l2 = tf.layers.batch_normalization(self.l2, training=self.training)
+
+        self.l3 = tf.add(tf.matmul(self.l2, self.hidden_layer3['W']), self.hidden_layer3['b'])
+        self.l3 = tf.nn.relu(self.l3)
+        self.l3 = tf.layers.batch_normalization(self.l3, training=self.training)
+
+        self.output = tf.add(tf.matmul(self.l3, self.output_layer['W']), self.output_layer['b'])
+
+        # L2 Regularization
+        self.trainable_vars = tf.trainable_variables()
+        self.lossL2 = tf.add_n([tf.nn.l2_loss(v) for v in self.trainable_vars if 'bias' not in v.name]) * self.lambd
+
+        # Loss function
+        self.loss = tf.reduce_mean(tf.losses.mean_squared_error(labels=self.y, predictions=self.output) + self.lossL2)
+
+        # Batch Normalization
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        with tf.control_dependencies(update_ops):
+            self.optimizer = tf.train.AdamOptimizer(learning_rate=self.lr).minimize(loss)
+
+        # Loss history
+        self.loss_history = []
+
+        # Global variables initializer
+        self.init = tf.global_variables_initializer()
+
+        # TensorFlow saver
+        self.saver = tf.train.Saver()
+
+    def train(self, features, labels, training):
+        """
+        Description
+           ---
+              Train linear regression.  Runs the optimizer on the loss function
+
+
+        Inputs
+           ---
+              features: Features of the machine learning model (X)
+                labels: Targets / Labels of the machine learning model (y)
+              training: Model training or testing, used for batch normalization
+
+        """
+        self.sess.run(optimizer, feed_dict={self.y: labels, self.X: features, self.training: training})
+
+    def test(self, features, training):
+        """
+        Description
+           ---
+              Test current model on test data.
+
+
+        Inputs
+           ---
+              features: Test features of the machine learning model (test_X)
+              training: Model training or testing, used for batch normalization
+
+
+        Returns
+           ---
+                 preds: Predictions of the target
+
+        """
+        return self.sess.run(self.output, feed_dict={self.X: features, self.training: training})
+
+    def loss_check(self, features, labels, training):
+        """
+        Description
+           ---
+              Checks current loss of the model
+
+
+        Inputs
+           ---
+              features: Features of the machine learning model (X)
+                labels: Targets / Labels of the machine learning model (y)
+              training: Model training or testing, used for batch normalization
+
+
+        Returns
+           ---
+              cur_loss: Current loss
+
+        """
+        cur_loss = self.sess.run(self.loss, feed_dict={self.y: labels, self.X: features, self.training: training})
+        self.loss_history.append(cur_loss)
+
+        return cur_loss
+
+    @staticmethod
+    def eval_loss(pred, actual):
+        """
+        Description
+           ---
+              Evaluates RMSE and MAE loss outside the session
+
+
+        Inputs
+           ---
+                  pred: Features of the machine learning model (X)
+                actual: Targets / Labels of the machine learning model (y)
+
+
+        Returns
+           ---
+                  rmse: Root mean squared error
+                   mae: Mean absolute error
+
+        """
+        error = np.subtract(pred, actual)
+        sq_error = np.square(error)
+        mean_sq_error = np.mean(sq_error)
+        rmse = np.sqrt(mean_sq_error)
+
+        abs_error = np.abs(error)
+        mae = np.mean(abs_error)
+
+        return rmse, mae
+
+
+def train_model(Data_path, Model_path, Norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=2048,
+                train_size=0.9, epochs=30, lambd=0.001, testing=True):
+
+    """
+    Description
+       ---
+
+
+
+    Inputs
+       ---
+              pred: Features of the machine learning model (X)
+            actual: Targets / Labels of the machine learning model (y)
+
+
+    Returns
+       ---
+              rmse: Root mean squared error
+               mae: Mean absolute error
+
+    """
+
+    return raw_data, heading_names, linear_reg
+
+
 
 
 
@@ -184,7 +372,7 @@ if __name__ == "__main__":
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/neural_network_models/checkpoints/ls.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/neural_network_models/normalization/ls.pickle'
 
-    Raw_data, Heading_names, Linear_reg, Weights_biases = simulation(Data_path, Model_path, Norm_path, test_size=0.05,
-                                                                     shuffle=True, lr=0.003, minibatch_size=2048,
-                                                                     train_size=0.9, epochs=30, lambd=0.001,
-                                                                     testing=True)
+    # Raw_data, Heading_names, Linear_reg = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
+    #                                                   shuffle=True, lr=0.003, minibatch_size=2048,
+    #                                                   train_size=0.9, epochs=30, lambd=0.001,
+    #                                                   testing=True)
