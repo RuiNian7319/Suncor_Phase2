@@ -332,34 +332,175 @@ class NeuralNetwork:
         return rmse, mae
 
 
-def train_model(Data_path, Model_path, Norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=2048,
+def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=2048,
                 train_size=0.9, epochs=30, lambd=0.001, testing=True):
 
     """
     Description
        ---
-
+          Trains a normalized (min-max) three-layer feedforward neural network model, given the data from data_path.
+          Model will be saved to model_path.  Advanced settings are set above.
 
 
     Inputs
        ---
-              pred: Features of the machine learning model (X)
-            actual: Targets / Labels of the machine learning model (y)
+              data_path: Path for the process data.  First column should be labels
+             model_path: Path for the model saving.
+              norm_path: Path for the normalization object.
+              test_size: Size
+                shuffle: Boolean, shuffle the data for training?  Breaks time correlation of data
+                     lr: Learning rate of the model, higher learning rate results in faster, more unstable learning.
+         minibatch_size: Size of batches for stochastic / minibatch gradient descent
+                 epochs: Number of passes through the whole data
+                  lambd: Regularization term
+                testing: Training or testing?
 
 
     Returns
        ---
-              rmse: Root mean squared error
-               mae: Mean absolute error
+               raw_data: Data used for model building
+          heading_names: Headings of the raw data
+             linear_reg: Linear regression object
 
     """
 
+    # Load data
+    raw_data = pd.read_csv(data_path)
+
+    # Get heading tags / names, then transform into NumPy array
+    heading_names = list(raw_data)
+    raw_data = raw_data.values
+
+    print('There are {} feature(s) and {} label(s) with {} examples.'.format(raw_data.shape[1] - 1, 1,
+                                                                             raw_data.shape[0]))
+
+    # Train / test split
+    train_x, test_x, train_y, test_y = train_test_split(raw_data[:, 1:], raw_data[:, 0], test_size=test_size,
+                                                        shuffle=shuffle, random_state=42)
+
+    train_x = train_x.reshape(-1, raw_data.shape[1] - 1)
+    test_x = test_x.reshape(-1, raw_data.shape[1] - 1)
+
+    train_y = train_y.reshape(-1, 1)
+    test_y = test_y.reshape(-1, 1)
+
+    # Normalization
+    if testing:
+        min_max_normalization = load(norm_path)
+
+    else:
+        min_max_normalization = MinMaxNormalization(np.concatenate([train_y, train_x], axis=1))
+
+    training_data = min_max_normalization(np.concatenate([train_y, train_x], axis=1))
+    testing_data = min_max_normalization(np.concatenate([test_y, test_x], axis=1))
+
+    train_x = training_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
+    test_x = testing_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
+
+    train_y = testing_data[:, 0].reshape(-1, 1)
+    test_y = testing_data[:, 0].reshape(-1, 1)
+
+    print(train_x)
+    # Test cases for NaN cases
+    assert(not np.nan(train_x).any())
+    assert(not np.nan(test_x).any())
+
+    assert(not np.nan(train_y).any())
+    assert(not np.nan(test_y).any())
+
+    with tf.Session() as sess:
+
+        # Build the neural network object
+        nn = NeuralNetwork(sess, train_x, train_y, test_x, test_y, lr=lr, minibatch_size=minibatch_size,
+                           train_size=train_size,
+                           epochs=epochs, lambd=lambd)
+
+        # If testing, just run the model
+        if testing:
+
+            # Restore model
+            nn.saver.restore(sess, model_path)
+
+            # Predict based on model
+            pred = nn.test(features=test_x, training=not testing)
+
+            # Unnormalize
+            pred = min_max_normalization.unnormalize_y(pred)
+
+            # Evaluate loss
+            rmse, mae = nn.eval_loss(pred, test_y)
+
+            print('Test RMSE: {:2f} | Test MAE: {:2f}'.format(rmse, mae))
+
+        else:
+
+            # Initialize global variables
+            sess.run(nn.init)
+
+            for epoch in range(epochs):
+
+                for i in range(nn.total_batch_number):
+
+                    # Minibatch gradient descent
+                    batch_index = int(i * nn.total_batch_number)
+
+                    minibatch_x = train_x[batch_index:batch_index + nn.total_batch_number, :]
+                    minibatch_y = train_y[batch_index:batch_index + nn.total_batch_number, :]
+
+                    # Optimize the machine learning model
+                    nn.train(features=minibatch_x, labels=minibatch_y, training=not testing)
+
+                    # Record loss
+                    if i % 10 == 0:
+                        _ = nn.loss_check(features=train_x, labels=train_y, training=not testing)
+
+                    # Evaluate training and testing losses
+                    if i % 150 == 0:
+
+                        # Predict training loss
+                        pred = nn.test(features=train_x, training=not testing)
+
+                        # Unnormalize
+                        pred = min_max_normalization.unnormalize_y(pred)
+                        label_y = min_max_normalization.unnormalize_y(train_y)
+
+                        # Evaluate training loss
+                        train_rmse, _ = nn.eval_loss(pred, label_y)
+
+                        # Predict test loss
+                        pred = nn.test(features=test_x, training=not testing)
+
+                        # Unnormalize
+                        pred = min_max_normalization.unnormalize_y(pred)
+                        label_y = min_max_normalization.unnormalize_y(test_y)
+
+                        # Evaluate training loss
+                        test_rmse, _ = nn.eval_loss(pred, label_y)
+
+                        print('Epoch: {} | Loss: {:2f} | Train RMSE: {:2f} | Test RMSE: {:2f}'.format(epoch,
+                                                                                                      current_loss,
+                                                                                                      train_rmse,
+                                                                                                      test_rmse))
+
+            # Save the model
+            nn.saver.save(sess, model_path)
+            print("Model saved at: {}".format(model_path))
+
+            # Save normalizer
+            save(min_max_normalization, norm_path)
+            print("Normalization saved at: {}".format(norm_path))
+
+            # Final test
+            test_pred = nn.test(features=test_x, training=not testing)
+
+            # Unnormalize data
+            test_pred = min_max_normalization.unnormalize_y(test_pred)
+            actual_y = min_max_normalization.unnormalize_y(test_y)
+
+            test_rmse, test_mae = nn.eval_loss(test_pred, actual_y)
+            print('Final Test Results:  Test RMSE: {:2f} | Test MAE: {:2f}'.format(test_rmse, test_mae))
+
     return raw_data, heading_names, linear_reg
-
-
-
-
-
 
 
 if __name__ == "__main__":
@@ -369,10 +510,10 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/Optimization_Data/Opti_withAllChangable.csv'
-    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/neural_network_models/checkpoints/ls.ckpt'
-    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/neural_network_models/normalization/ls.pickle'
+    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/neural_network_models/checkpoints/nn.ckpt'
+    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/neural_network_models/normalization/nn.pickle'
 
-    # Raw_data, Heading_names, Linear_reg = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
-    #                                                   shuffle=True, lr=0.003, minibatch_size=2048,
-    #                                                   train_size=0.9, epochs=30, lambd=0.001,
-    #                                                   testing=True)
+    Raw_data, Heading_names, Linear_reg = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
+                                                      shuffle=True, lr=0.003, minibatch_size=2048,
+                                                      train_size=0.9, epochs=30, lambd=0.001,
+                                                      testing=False)

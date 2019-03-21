@@ -322,17 +322,17 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
                 shuffle: Boolean, shuffle the data for training?  Breaks time correlation of data
                      lr: Learning rate of the model, higher learning rate results in faster, more unstable learning.
          minibatch_size: Size of batches for stochastic / minibatch gradient descent
-                 epochs:
-                  lambd:
-                testing:
+                 epochs: Number of passes through the whole data
+                  lambd: Regularization term
+                testing: Training or testing?
 
 
     Returns
        ---
-               raw_data:
-          heading_names:
-             linear_reg:
-         weights_biases:
+               raw_data: Data used for model building
+          heading_names: Headings of the raw data
+             linear_reg: Linear regression object
+         weights_biases: Weights and biases of the model
 
     """
 
@@ -372,6 +372,7 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
     train_y = training_data[:, 0].reshape(-1, 1)
     test_y = testing_data[:, 0].reshape(-1, 1)
 
+    print(train_x)
     # Test cases for NaN values
     assert(not np.isnan(train_x).any())
     assert(not np.isnan(test_x).any())

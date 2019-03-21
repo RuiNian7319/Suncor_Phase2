@@ -319,19 +319,30 @@ def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, l
     """
     Description
        ---
-          Evaluates RMSE and MAE loss outside the session
+          Trains a normalized (min-max) linear regression model, given the data from data_path.  Model will be saved
+          to model_path.  Advanced settings are set above.
 
 
     Inputs
        ---
-              pred: Features of the machine learning model (X)
-            actual: Targets / Labels of the machine learning model (y)
+              data_path: Path for the process data.  First column should be labels
+             model_path: Path for the model saving.
+              norm_path: Path for the normalization object.
+              test_size: Size
+                shuffle: Boolean, shuffle the data for training?  Breaks time correlation of data
+                     lr: Learning rate of the model, higher learning rate results in faster, more unstable learning.
+         minibatch_size: Size of batches for stochastic / minibatch gradient descent
+                 epochs: Number of passes through the whole data
+                  lambd: Regularization term
+                testing: Training or testing?
 
 
     Returns
        ---
-              rmse: Root mean squared error
-               mae: Mean absolute error
+               raw_data: Data used for model building
+          heading_names: Headings of the raw data
+             linear_reg: Linear regression object
+         weights_biases: Weights and biases of the model
 
     """
 
