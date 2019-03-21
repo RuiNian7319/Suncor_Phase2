@@ -25,6 +25,9 @@ Opti_withAllChangablev2: Includes all changable (density, ppm merged, non-smooth
 
 Opti_1stPrinc: Dataset for 1st principle modelling.  2x dra, 2x vfd, 4x pump
 
+Opti_withAllChangable: [Flow, DRA x4, On/off pumps x4, VFDs x2, Density x3]
+Opti_withAllChangableHalf: [Flow, DRA x4, On/off pumps x4, VFDs x2, Density x3] except half
+
 # Important findings
 1. Fort Lupton pressure reading is 90% correlated with pressure.
 2. Density increases prediction accuracy
@@ -259,5 +262,14 @@ MAE: 203
 
 ### March 19th
 Objectizing LS
+
+Done
+
+### March 20th
+Objectizing NN
+
+### March 21st
+Building new data set: [Flow, DRA x4, On/off pumps, VFDs, Density]
+Taking only half the data to build a more accurate model.
 
 

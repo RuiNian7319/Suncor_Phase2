@@ -391,6 +391,12 @@ def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, l
 
             weights_biases = linear_reg.weights_and_biases()
 
+            # Non-scrambled data plot
+            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
+                     data=raw_data,
+                     time_start=1, time_end=5000,
+                     adv_plot=False)
+
         else:
             # Global variables initializer
             sess.run(linear_reg.init)
@@ -457,6 +463,12 @@ def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, l
 
             weights_biases = linear_reg.weights_and_biases()
 
+            # Non-scrambled data plot
+            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
+                     data=raw_data,
+                     time_start=1, time_end=5000,
+                     adv_plot=False)
+
     return raw_data, heading_names, linear_reg, weights_biases
 
 
@@ -472,5 +484,5 @@ if __name__ == "__main__":
 
     Raw_data, Heading_names, Linear_reg, Weights_biases = simulation(Data_path, Model_path, Norm_path, test_size=0.05,
                                                                      shuffle=True, lr=0.003, minibatch_size=2048,
-                                                                     train_size=0.9, epochs=30, lambd=0.001,
-                                                                     testing=True)
+                                                                     train_size=0.9, epochs=45, lambd=0.001,
+                                                                     testing=False)
