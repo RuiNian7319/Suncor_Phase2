@@ -308,4 +308,49 @@ MAE: 77
 
 Building pressure constraint models:  Seems that Ault is in the most danger of exceeding pressure.
 
+Cheyenne (Safety Sensitive: Medium)
+
+Linear Regression (Chey_Pres):
+RMSE: 134
+MAE: 98
+
+NN - 30 node layers (Chey_Pres):
+RMSE:
+MAE:
+
+Ault (Safety Sensitive: Severe)
+
+Linear Regression (Ault_Pres):
+RMSE: 200
+MAE: 161
+
+NN - 30 node layers (Ault_Pres):
+RMSE:
+MAE:
+
+Fort Lupton (Safety Sensitive: Mild)
+
+Linear Regression (FL_Pres):
+RMSE: 42
+MAE: 33
+
+NN - 30 node layers (FL_Pres):
+RMSE:
+MAE:
+
+**Remove DRA readings**
+
+Ault (Safety Sensitive: Severe)
+
+Linear Regression (Ault_Pres):
+RMSE: 220
+MAE: 178
+
+Fort Lupton (Safety Sensitive: Mild)
+
+Linear Regression (FL_Pres):
+RMSE: Failed
+MAE: Failed
+
+
 
