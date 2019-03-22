@@ -292,3 +292,20 @@ Linear Regression Constrained (Opti_withAllChangableHalf):
 RMSE: 181
 MAE: 131
 
+Linear Regression Constrained and Non-normalized (Opti_withAllChangable):
+RMSE: 182
+MAE: 136
+
+### March 22nd
+
+NN - 30 node layers (Opti_withAllChangable):
+RMSE: 126
+MAE: 95
+
+NN - 30 node layers (Opti_withAllChangableHalf):
+RMSE: 106
+MAE: 77
+
+Building pressure constraint models:  Seems that Ault is in the most danger of exceeding pressure.
+
+

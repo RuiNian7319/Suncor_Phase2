@@ -314,8 +314,8 @@ class LinearRegression:
         return rmse, mae
 
 
-def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=2048,
-               train_size=0.9, epochs=30, lambd=0.001, testing=False, num_of_const=10):
+def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=2048,
+                train_size=0.9, epochs=30, lambd=0.001, testing=False, loading=False, num_of_const=10):
     """
     Description
        ---
@@ -335,6 +335,7 @@ def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, l
                  epochs: Number of passes through the whole data
                   lambd: Regularization term
                 testing: Training or testing?
+                loading: If you want to load an old model for further training
 
 
     Returns
@@ -415,8 +416,14 @@ def simulation(data_path, model_path, norm_path, test_size=0.05, shuffle=True, l
             weights_biases = linear_reg.weights_and_biases()
 
         else:
-            # Global variables initializer
-            sess.run(linear_reg.init)
+
+            # Load an old model for further training
+            if loading:
+                linear_reg.saver.restore(sess, Model_path)
+
+            else:
+                # Global variables initializer
+                sess.run(linear_reg.init)
 
             for epoch in range(linear_reg.epochs):
 
@@ -502,7 +509,7 @@ if __name__ == "__main__":
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/Objects/checkpoints/ls.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/Objects/normalization/ls.pickle'
 
-    Raw_data, Heading_names, Linear_reg, Weights_biases = simulation(Data_path, Model_path, Norm_path, test_size=0.05,
-                                                                     shuffle=True, lr=0.003, minibatch_size=2048,
-                                                                     train_size=0.9, epochs=100, lambd=0.001,
-                                                                     testing=False, num_of_const=10)
+    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
+                                                                      shuffle=True, lr=0.003, minibatch_size=2048,
+                                                                      train_size=0.9, epochs=100, lambd=0.001,
+                                                                      testing=False, loading=False, num_of_const=10)

@@ -121,6 +121,9 @@ class NeuralNetwork:
            train_size: % of data used for training
                epochs: Number of passes through the whole data set
                 lambd: Normalization parameter for L1 or L2 normalization
+             h1_nodes: Amount of neurons in 1st hidden layer
+             h2_nodes: Amount of neurons in 2nd hidden layer
+             h3_nodes: Amount of neurons in 3rd hidden layer
 
 
     Methods
@@ -139,7 +142,7 @@ class NeuralNetwork:
         return print('NeuralNetwork()')
 
     def __init__(self, session, train_x, train_y, test_x, test_y, lr=0.003, minibatch_size=2048, train_size=0.9,
-                 epochs=5, lambd=0.001):
+                 epochs=5, lambd=0.001, h1_nodes=30, h2_nodes=30, h3_nodes=30):
 
         """
         Notes: Input data are in shape [m, Nx]
@@ -170,10 +173,10 @@ class NeuralNetwork:
         self.total_batch_number = int((self.m / self.minibatch_size) * self.train_size)
 
         # Neural Network Parameters
-        self.input_size = nx
-        self.h1_nodes = 30
-        self.h2_nodes = 30
-        self.h3_nodes = 30
+        self.input_size = self.nx
+        self.h1_nodes = h1_nodes
+        self.h2_nodes = h2_nodes
+        self.h3_nodes = h3_nodes
         self.output_size = 1
 
         # TensorFlow placeholders
@@ -230,7 +233,7 @@ class NeuralNetwork:
         # Batch Normalization
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         with tf.control_dependencies(update_ops):
-            self.optimizer = tf.train.AdamOptimizer(learning_rate=self.lr).minimize(loss)
+            self.optimizer = tf.train.AdamOptimizer(learning_rate=self.lr).minimize(self.loss)
 
         # Loss history
         self.loss_history = []
@@ -255,7 +258,8 @@ class NeuralNetwork:
               training: Model training or testing, used for batch normalization
 
         """
-        self.sess.run(optimizer, feed_dict={self.y: labels, self.X: features, self.training: training})
+
+        self.sess.run(self.optimizer, feed_dict={self.y: labels, self.X: features, self.training: training})
 
     def test(self, features, training):
         """
@@ -333,7 +337,8 @@ class NeuralNetwork:
 
 
 def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=2048,
-                train_size=0.9, epochs=30, lambd=0.001, testing=True):
+                epochs=30, lambd=0.001, h1_nodes=30, h2_nodes=30, h3_nodes=30,
+                testing=True, loading=False):
 
     """
     Description
@@ -347,13 +352,17 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
               data_path: Path for the process data.  First column should be labels
              model_path: Path for the model saving.
               norm_path: Path for the normalization object.
-              test_size: Size
+              test_size: Size of testing data set
                 shuffle: Boolean, shuffle the data for training?  Breaks time correlation of data
                      lr: Learning rate of the model, higher learning rate results in faster, more unstable learning.
          minibatch_size: Size of batches for stochastic / minibatch gradient descent
                  epochs: Number of passes through the whole data
                   lambd: Regularization term
+               h1_nodes: Amount of neurons in 1st hidden layer
+               h2_nodes: Amount of neurons in 2nd hidden layer
+               h3_nodes: Amount of neurons in 3rd hidden layer
                 testing: Training or testing?
+                loading: True if you want to load an old model for further training
 
 
     Returns
@@ -397,22 +406,21 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
     train_x = training_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
     test_x = testing_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
 
-    train_y = testing_data[:, 0].reshape(-1, 1)
+    train_y = training_data[:, 0].reshape(-1, 1)
     test_y = testing_data[:, 0].reshape(-1, 1)
 
-    print(train_x)
     # Test cases for NaN cases
-    assert(not np.nan(train_x).any())
-    assert(not np.nan(test_x).any())
+    assert(not np.isnan(train_x).any())
+    assert(not np.isnan(test_x).any())
 
-    assert(not np.nan(train_y).any())
-    assert(not np.nan(test_y).any())
+    assert(not np.isnan(train_y).any())
+    assert(not np.isnan(test_y).any())
 
     with tf.Session() as sess:
 
         # Build the neural network object
         nn = NeuralNetwork(sess, train_x, train_y, test_x, test_y, lr=lr, minibatch_size=minibatch_size,
-                           train_size=train_size,
+                           train_size=1 - test_size, h1_nodes=h1_nodes, h2_nodes=h2_nodes, h3_nodes=h3_nodes,
                            epochs=epochs, lambd=lambd)
 
         # If testing, just run the model
@@ -434,8 +442,13 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
 
         else:
 
-            # Initialize global variables
-            sess.run(nn.init)
+            # If loading old model for continued training
+            if loading:
+                nn.saver.restore(sess, Model_path)
+
+            else:
+                # Initialize global variables
+                sess.run(nn.init)
 
             for epoch in range(epochs):
 
@@ -444,8 +457,8 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
                     # Minibatch gradient descent
                     batch_index = int(i * nn.total_batch_number)
 
-                    minibatch_x = train_x[batch_index:batch_index + nn.total_batch_number, :]
-                    minibatch_y = train_y[batch_index:batch_index + nn.total_batch_number, :]
+                    minibatch_x = train_x[batch_index:batch_index + nn.minibatch_size, :]
+                    minibatch_y = train_y[batch_index:batch_index + nn.minibatch_size, :]
 
                     # Optimize the machine learning model
                     nn.train(features=minibatch_x, labels=minibatch_y, training=not testing)
@@ -456,6 +469,9 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
 
                     # Evaluate training and testing losses
                     if i % 150 == 0:
+
+                        # Check for loss
+                        current_loss = nn.loss_check(features=test_x, labels=test_y, training=not testing)
 
                         # Predict training loss
                         pred = nn.test(features=train_x, training=not testing)
@@ -500,7 +516,7 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             test_rmse, test_mae = nn.eval_loss(test_pred, actual_y)
             print('Final Test Results:  Test RMSE: {:2f} | Test MAE: {:2f}'.format(test_rmse, test_mae))
 
-    return raw_data, heading_names, linear_reg
+    return raw_data, heading_names, nn
 
 
 if __name__ == "__main__":
@@ -513,7 +529,7 @@ if __name__ == "__main__":
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/neural_network_models/checkpoints/nn.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/neural_network_models/normalization/nn.pickle'
 
-    Raw_data, Heading_names, Linear_reg = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
-                                                      shuffle=True, lr=0.003, minibatch_size=2048,
-                                                      train_size=0.9, epochs=30, lambd=0.001,
-                                                      testing=False)
+    Raw_data, Heading_names, NN = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
+                                              shuffle=True, lr=0.001, minibatch_size=2048,
+                                              epochs=100, lambd=0.001, h1_nodes=30, h2_nodes=30,
+                                              h3_nodes=30, testing=False, loading=False)

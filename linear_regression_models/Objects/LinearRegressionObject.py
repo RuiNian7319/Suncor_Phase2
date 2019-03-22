@@ -305,7 +305,7 @@ class LinearRegression:
 
 
 def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=2048,
-                epochs=30, lambd=0.001, testing=False):
+                epochs=30, lambd=0.001, testing=False, loading=False):
     """
     Description
        ---
@@ -325,6 +325,7 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
                  epochs: Number of passes through the whole data
                   lambd: Regularization term
                 testing: Training or testing?
+                loading: If you want to load an old model for further training
 
 
     Returns
@@ -372,7 +373,6 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
     train_y = training_data[:, 0].reshape(-1, 1)
     test_y = testing_data[:, 0].reshape(-1, 1)
 
-    print(train_x)
     # Test cases for NaN values
     assert(not np.isnan(train_x).any())
     assert(not np.isnan(test_x).any())
@@ -412,8 +412,14 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
                      adv_plot=False)
 
         else:
-            # Global variables initializer
-            sess.run(linear_reg.init)
+
+            # Load old model for further testing
+            if loading:
+                linear_reg.saver.restore(sess, Model_path)
+
+            else:
+                # Global variables initializer
+                sess.run(linear_reg.init)
 
             for epoch in range(linear_reg.epochs):
 
@@ -499,4 +505,4 @@ if __name__ == "__main__":
     Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
                                                                       shuffle=True, lr=0.003, minibatch_size=2048,
                                                                       epochs=100, lambd=0.001,
-                                                                      testing=False)
+                                                                      testing=False, loading=False)

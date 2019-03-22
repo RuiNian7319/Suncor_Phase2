@@ -1,2 +1,2 @@
-model_checkpoint_path: "pipeline_model.ckpt"
-all_model_checkpoint_paths: "pipeline_model.ckpt"
+model_checkpoint_path: "/home/rui/Documents/Willowglen/Suncor_Phase2/neural_network_models/checkpoints/nn.ckpt"
+all_model_checkpoint_paths: "/home/rui/Documents/Willowglen/Suncor_Phase2/neural_network_models/checkpoints/nn.ckpt"
