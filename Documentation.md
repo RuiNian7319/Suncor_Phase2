@@ -315,8 +315,8 @@ RMSE: 134
 MAE: 98
 
 NN - 30 node layers (Chey_Pres):
-RMSE:
-MAE:
+RMSE: low
+MAE: low
 
 Ault (Safety Sensitive: Severe)
 
@@ -325,8 +325,8 @@ RMSE: 200
 MAE: 161
 
 NN - 30 node layers (Ault_Pres):
-RMSE:
-MAE:
+RMSE: low
+MAE: low
 
 Fort Lupton (Safety Sensitive: Mild)
 
@@ -335,8 +335,8 @@ RMSE: 42
 MAE: 33
 
 NN - 30 node layers (FL_Pres):
-RMSE:
-MAE:
+RMSE: low
+MAE: low
 
 **Remove DRA readings**
 
@@ -352,5 +352,24 @@ Linear Regression (FL_Pres):
 RMSE: Failed
 MAE: Failed
 
+### March 22nd
 
+Linear Regression (Chey_Pres):
+RMSE: 134
+MAE: 98
+**NOTES: A lot of actual pressure are much higher than predicted... can be easily seen in predictions vs actual**
 
+Linear Regression (Ault_Pres):
+RMSE: 196
+MAE: 156
+**NOTES: Fits are kinda bad, like really bad**
+
+Linear Regression (FL_Pres):
+RMSE: 41
+MAE: 32
+**NOTES: Real reading is insanely noisy**
+
+Linear Regression - Pressure smoothed (FL_Pres):
+RMSE: 41
+MAE: 32
+**NOTES: Real reading is insanely noisy**
