@@ -1,2 +1,2 @@
-model_checkpoint_path: "ls_withAllPressure.ckpt"
-all_model_checkpoint_paths: "ls_withAllPressure.ckpt"
+model_checkpoint_path: "/Users/ruinian/Documents/Willowglen//Suncor_Phase2/pressure_models/Cheyenne/checkpoints/lsFL.ckpt"
+all_model_checkpoint_paths: "/Users/ruinian/Documents/Willowglen//Suncor_Phase2/pressure_models/Cheyenne/checkpoints/lsFL.ckpt"
