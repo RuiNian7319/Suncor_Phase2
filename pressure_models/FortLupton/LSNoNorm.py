@@ -461,18 +461,18 @@ if __name__ == "__main__":
     random_seed(42)
 
     # Specify data, model and normalization paths, Linux
-    # Data_path = '/home/rui/Documents/Willowglen/data/PresConstr_Data/FL_Pres.csv'
-    # Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-    #              'linear_regression_models/Objects/checkpoints/lsFL.ckpt'
-    # Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-    #             'linear_regression_models/Objects/normalization/lsFL.pickle'
+    Data_path = '/home/rui/Documents/Willowglen/data/PresConstr_Data/FL_Pres.csv'
+    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
+                 'linear_regression_models/Objects/checkpoints/lsFL.ckpt'
+    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
+                'linear_regression_models/Objects/normalization/lsFL.pickle'
 
     # Specify data, model and normalization paths, MacOS
-    Data_path = '/Users/ruinian/Documents/Willowglen/data/PresConstr_Data/FL_Pres.csv'
-    Model_path = '/Users/ruinian/Documents/Willowglen//Suncor_Phase2/' \
-                 'pressure_models/Cheyenne/checkpoints/lsFL.ckpt'
-    Norm_path = '/Users/ruinian/Documents/Willowglen//Suncor_Phase2/' \
-                'pressure_models/Cheyenne/normalization/lsFL.pickle'
+    # Data_path = '/Users/ruinian/Documents/Willowglen/data/PresConstr_Data/FL_Pres.csv'
+    # Model_path = '/Users/ruinian/Documents/Willowglen//Suncor_Phase2/' \
+    #              'pressure_models/Cheyenne/checkpoints/lsFL.ckpt'
+    # Norm_path = '/Users/ruinian/Documents/Willowglen//Suncor_Phase2/' \
+    #             'pressure_models/Cheyenne/normalization/lsFL.pickle'
 
     Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
                                                                       shuffle=True, lr=0.003, minibatch_size=2048,

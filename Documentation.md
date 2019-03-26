@@ -370,6 +370,5 @@ MAE: 32
 **NOTES: Real reading is insanely noisy**
 
 Linear Regression - Pressure smoothed (FL_Pres):
-RMSE: 41
-MAE: 32
-**NOTES: Real reading is insanely noisy**
+RMSE: 39
+MAE: 31
