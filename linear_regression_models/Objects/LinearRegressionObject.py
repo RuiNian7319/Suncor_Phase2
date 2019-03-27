@@ -498,13 +498,14 @@ if __name__ == "__main__":
     random_seed(42)
 
     # Specify data, model and normalization paths
-    Data_path = '/home/rui/Documents/Willowglen/data/PresConstr_Data/FL_Pres.csv'
+    Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
+                '2019AllData.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
                  'linear_regression_models/Objects/checkpoints/lsFL.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
                 'linear_regression_models/Objects/normalization/lsFL.pickle'
 
     Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
-                                                                      shuffle=True, lr=0.003, minibatch_size=2048,
-                                                                      epochs=100, lambd=0.001,
+                                                                      shuffle=True, lr=0.001, minibatch_size=2048,
+                                                                      epochs=300, lambd=0.001,
                                                                       testing=False, loading=False)

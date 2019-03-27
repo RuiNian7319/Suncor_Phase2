@@ -30,8 +30,8 @@ def seq_pred(session, model, features, data, normalizer, time_start, time_end, x
           normalizer: Normalization object.  If un-normalized data is preferred, pass normalizer=None
           time_start: Start index in the data
             time_end: End index in the data
-              xlabel:
-              ylabel:
+              xlabel: Label of the x-axis
+              ylabel: Label of the y-axis
             adv_plot: Plot with fancy error bars
 
     Outputs (No returns)
