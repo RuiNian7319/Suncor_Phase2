@@ -525,11 +525,12 @@ if __name__ == "__main__":
     random_seed(42)
 
     # Specify data, model and normalization paths
-    Data_path = '/home/rui/Documents/Willowglen/data/PresConstr_Data/Aukt_Pres.csv'
-    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/neural_network_models/checkpoints/nnAult.ckpt'
-    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/neural_network_models/normalization/nnAult.pickle'
+    Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
+                '2019AllData.csv'
+    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/neural_network_models/checkpoints/nn2019.ckpt'
+    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/neural_network_models/normalization/nn2019.pickle'
 
     Raw_data, Heading_names, NN = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
                                               shuffle=True, lr=0.001, minibatch_size=2048,
                                               epochs=200, lambd=0.001, h1_nodes=30, h2_nodes=30,
-                                              h3_nodes=30, testing=False, loading=False)
+                                              h3_nodes=30, testing=False, loading=True)

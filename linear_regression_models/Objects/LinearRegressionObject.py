@@ -305,7 +305,7 @@ class LinearRegression:
 
 
 def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=2048,
-                epochs=30, lambd=0.001, testing=False, loading=False):
+                epochs=30, lambd=0.001, testing=False, loading=False, plot_start=1, plot_end=5000):
     """
     Description
        ---
@@ -326,6 +326,8 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
                   lambd: Regularization term
                 testing: Training or testing?
                 loading: If you want to load an old model for further training
+             plot_start: Index for the start of the validation plot
+               plot_end: Index for the end of the validation plot
 
 
     Returns
@@ -408,7 +410,7 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             # Non-scrambled data plot
             seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
                      data=raw_data,
-                     time_start=1, time_end=5000,
+                     time_start=plot_start, time_end=plot_end,
                      adv_plot=False)
 
         else:
@@ -486,7 +488,7 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             # Non-scrambled data plot
             seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
                      data=raw_data,
-                     time_start=1, time_end=5000,
+                     time_start=plot_start, time_end=plot_end,
                      adv_plot=False)
 
     return raw_data, heading_names, linear_reg, weights_biases
@@ -508,4 +510,5 @@ if __name__ == "__main__":
     Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
                                                                       shuffle=True, lr=0.001, minibatch_size=2048,
                                                                       epochs=300, lambd=0.001,
-                                                                      testing=False, loading=False)
+                                                                      testing=True, loading=False,
+                                                                      plot_start=5000, plot_end=6000)

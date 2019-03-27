@@ -67,7 +67,7 @@ def seq_pred(session, model, features, data, normalizer, time_start, time_end, x
     rmse_loss = np.sqrt(np.mean(np.square(np.subtract(plot_y, preds))))
     mae_loss = np.mean(np.abs(np.subtract(plot_y, preds)))
 
-    print('Seq. RMSE: {} | Seq. MAE: {}'.format(rmse_loss, mae_loss))
+    print('Seq. RMSE: {:2f} | Seq. MAE: {:2f}'.format(rmse_loss, mae_loss))
 
     if adv_plot:
         # Visualization of model in production with fancy error bars
@@ -95,8 +95,8 @@ def seq_pred(session, model, features, data, normalizer, time_start, time_end, x
 
     else:
         # Visualization of model in production without fancy error bars
-        plt.plot(preds[time_start:time_end], label='Predicted')
-        plt.plot(plot_y[time_start:time_end], label='Actual')
+        plt.plot(preds[0:time_end - time_start], label='Predicted')
+        plt.plot(plot_y[0:time_end - time_start], label='Actual')
 
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
