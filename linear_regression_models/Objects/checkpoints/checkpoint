@@ -1,2 +1,2 @@
-model_checkpoint_path: "/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/Objects/checkpoints/lsFL.ckpt"
-all_model_checkpoint_paths: "/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/Objects/checkpoints/lsFL.ckpt"
+model_checkpoint_path: "/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/Objects/checkpoints/ls2019.ckpt"
+all_model_checkpoint_paths: "/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/Objects/checkpoints/ls2019.ckpt"
