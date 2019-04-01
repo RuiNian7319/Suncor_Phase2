@@ -3,6 +3,7 @@
 ## Sub-folders
 
 **linear_regression_models**: Linear models for overall optimization. Regressors: X <br>
+**2019_models: 2019 Models**
 **sqrt_models**: Sqrt models for overall optimization.  Regressor: sqrt(X), X <br>
 **quadratic_models**: Quadratic models for overall optimization.  Regressors: X^2, X <br>
 **neural_network_models**: Neural networks for overall optimization.  Regressors: X <br>
