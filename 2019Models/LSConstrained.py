@@ -521,7 +521,7 @@ if __name__ == "__main__":
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/' \
                 'Objects/normalization/ls2019.pickle'
 
-    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.1,
-                                                                      shuffle=False, lr=0.001, minibatch_size=2048,
-                                                                      train_size=0.9, epochs=700, lambd=0.001,
+    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
+                                                                      shuffle=True, lr=0.001, minibatch_size=2048,
+                                                                      train_size=0.95, epochs=700, lambd=0.001,
                                                                       testing=False, loading=False, num_of_const=10)
