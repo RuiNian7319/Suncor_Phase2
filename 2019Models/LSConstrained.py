@@ -515,13 +515,13 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
-                '2019AllDataChey.csv'
+                'data_test.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/' \
-                 'Objects/checkpoints/ls2019.ckpt'
+                 'Objects/checkpoints/test2019.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/' \
-                'Objects/normalization/ls2019.pickle'
+                'Objects/normalization/test2019.pickle'
 
-    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
-                                                                      shuffle=True, lr=0.001, minibatch_size=2048,
-                                                                      train_size=0.95, epochs=700, lambd=0.001,
-                                                                      testing=False, loading=False, num_of_const=10)
+    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.99,
+                                                                      shuffle=False, lr=0.001, minibatch_size=2048,
+                                                                      train_size=0.01, epochs=700, lambd=0.001,
+                                                                      testing=True, loading=False, num_of_const=10)
