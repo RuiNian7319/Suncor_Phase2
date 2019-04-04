@@ -26,7 +26,6 @@ import warnings
 
 import sys
 sys.path.insert(0, '/home/rui/Documents/Willowglen/Suncor_Phase2')
-sys.path.insert(0, '/Users/ruinian/Documents/Willowglen/Suncor_Phase2')
 
 from EWMA import ewma
 from Seq_plot import seq_pred
@@ -306,7 +305,7 @@ class LinearRegression:
 
 
 def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=2048,
-                epochs=30, lambd=0.001, testing=False, loading=False):
+                epochs=30, lambd=0.001, testing=False, loading=False, plot_start=1, plot_end=5000):
     """
     Description
        ---
@@ -327,6 +326,8 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
                   lambd: Regularization term
                 testing: Training or testing?
                 loading: If you want to load an old model for further training
+             plot_start: Index for the start of the validation plot
+               plot_end: Index for the end of the validation plot
 
 
     Returns
@@ -409,7 +410,7 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             # Non-scrambled data plot
             seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
                      data=raw_data,
-                     time_start=1, time_end=5000,
+                     time_start=plot_start, time_end=plot_end,
                      adv_plot=False)
 
         else:
@@ -487,20 +488,8 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             # Non-scrambled data plot
             seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
                      data=raw_data,
-                     time_start=1, time_end=5000,
+                     time_start=plot_start, time_end=plot_end,
                      adv_plot=False)
-
-            # Residual plot
-            plt.scatter(np.linspace(0, test_pred.shape[0], test_pred.shape[0]), test_pred - actual_y)
-            plt.xlabel('Samples')
-            plt.ylabel('Residual')
-            plt.show()
-
-            # Prediction evaluation plot
-            plt.scatter(test_pred, actual_y)
-            plt.xlabel('Predictions')
-            plt.ylabel('Actual')
-            plt.show()
 
     return raw_data, heading_names, linear_reg, weights_biases
 
@@ -510,21 +499,16 @@ if __name__ == "__main__":
     # Seed NumPy and TensorFlow with the meaning of life
     random_seed(42)
 
-    # Specify data, model and normalization paths, Linux
-    Data_path = '/home/rui/Documents/Willowglen/data/PresConstr_Data/FL_Pres.csv'
-    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                 'linear_regression_models/Objects/checkpoints/lsFL.ckpt'
-    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                'linear_regression_models/Objects/normalization/lsFL.pickle'
-
-    # Specify data, model and normalization paths, MacOS
-    # Data_path = '/Users/ruinian/Documents/Willowglen/data/PresConstr_Data/Chey_Pres.csv'
-    # Model_path = '/Users/ruinian/Documents/Willowglen//Suncor_Phase2/' \
-    #              'pressure_models/Cheyenne/checkpoints/lsChey.ckpt'
-    # Norm_path = '/Users/ruinian/Documents/Willowglen//Suncor_Phase2/' \
-    #             'pressure_models/Cheyenne/normalization/lsChey.pickle'
+    # Specify data, model and normalization paths
+    Data_path = '/home/rui/Documents/Willowglen/data/PresConstr_Data/' \
+                'Chey_Pres.csv'
+    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_const_models/' \
+                 'Cheyenne/checkpoints/lsChey.ckpt'
+    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_const_models/' \
+                'Cheyenne/normalization/lsChey.pickle'
 
     Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
-                                                                      shuffle=True, lr=0.003, minibatch_size=2048,
+                                                                      shuffle=True, lr=0.001, minibatch_size=2048,
                                                                       epochs=100, lambd=0.001,
-                                                                      testing=False, loading=False)
+                                                                      testing=False, loading=False,
+                                                                      plot_start=5000, plot_end=6000)

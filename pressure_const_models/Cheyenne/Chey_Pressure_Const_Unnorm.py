@@ -26,10 +26,10 @@ import warnings
 
 import sys
 sys.path.insert(0, '/home/rui/Documents/Willowglen/Suncor_Phase2')
-sys.path.insert(0, '/Users/ruinian/Documents/Willowglen/Suncor_Phase2')
 
 from EWMA import ewma
 from Seq_plot import seq_pred
+from MinMaxNorm import MinMaxNormalization
 
 warnings.filterwarnings('ignore')
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'
@@ -305,7 +305,7 @@ class LinearRegression:
 
 
 def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=2048,
-                epochs=30, lambd=0.001, testing=False, loading=False):
+                epochs=30, lambd=0.001, testing=False, loading=False, plot_start=1, plot_end=5000):
     """
     Description
        ---
@@ -326,6 +326,8 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
                   lambd: Regularization term
                 testing: Training or testing?
                 loading: If you want to load an old model for further training
+             plot_start: Index for the start of the validation plot
+               plot_end: Index for the end of the validation plot
 
 
     Returns
@@ -356,6 +358,23 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
     train_y = train_y.reshape(-1, 1)
     test_y = test_y.reshape(-1, 1)
 
+    # Normalization
+    if testing:
+        min_max_normalization = load(norm_path)
+
+    else:
+        min_max_normalization = MinMaxNormalization(np.concatenate([train_y, train_x], axis=1))
+
+    training_data = min_max_normalization(np.concatenate([train_y, train_x], axis=1))
+    testing_data = min_max_normalization(np.concatenate([test_y, test_x], axis=1))
+
+    # Reshape for TensorFlow
+    train_x = training_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
+    test_x = testing_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
+
+    train_y = training_data[:, 0].reshape(-1, 1)
+    test_y = testing_data[:, 0].reshape(-1, 1)
+
     # Test cases for NaN values
     assert(not np.isnan(train_x).any())
     assert(not np.isnan(test_x).any())
@@ -377,6 +396,10 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             # Pred testing values
             pred = linear_reg.test(test_x)
 
+            # Unnormalize
+            pred = min_max_normalization.unnormalize_y(pred)
+            test_y = min_max_normalization.unnormalize_y(test_y)
+
             # Evaluate loss
             rmse, mae = linear_reg.eval_loss(pred, test_y)
 
@@ -385,9 +408,9 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             weights_biases = linear_reg.weights_and_biases()
 
             # Non-scrambled data plot
-            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=None,
+            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
                      data=raw_data,
-                     time_start=1, time_end=5000,
+                     time_start=plot_start, time_end=plot_end,
                      adv_plot=False)
 
         else:
@@ -422,12 +445,20 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
 
                         train_pred = linear_reg.test(features=train_x)
 
+                        # Unnormalize data
+                        train_pred = min_max_normalization.unnormalize_y(train_pred)
+                        actual_y = min_max_normalization.unnormalize_y(train_y)
+
                         # Evaluate error
-                        train_rmse, train_mae = linear_reg.eval_loss(train_pred, train_y)
+                        train_rmse, train_mae = linear_reg.eval_loss(train_pred, actual_y)
 
                         test_pred = linear_reg.test(features=test_x)
 
-                        test_rmse, test_mae = linear_reg.eval_loss(test_pred, test_y)
+                        # Unnormalize data
+                        test_pred = min_max_normalization.unnormalize_y(test_pred)
+                        actual_y = min_max_normalization.unnormalize_y(test_y)
+
+                        test_rmse, test_mae = linear_reg.eval_loss(test_pred, actual_y)
 
                         print('Epoch: {} | Loss: {:2f} | Train RMSE: {:2f} | Test RMSE: {:2f}'.format(epoch,
                                                                                                       current_loss,
@@ -438,18 +469,26 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             linear_reg.saver.save(sess, model_path)
             print("Model saved at: {}".format(model_path))
 
+            # Save normalizer
+            save(min_max_normalization, norm_path)
+            print("Normalization saved at: {}".format(norm_path))
+
             # Final test
             test_pred = linear_reg.test(features=test_x)
 
-            test_rmse, test_mae = linear_reg.eval_loss(test_pred, test_y)
+            # Unnormalize data
+            test_pred = min_max_normalization.unnormalize_y(test_pred)
+            actual_y = min_max_normalization.unnormalize_y(test_y)
+
+            test_rmse, test_mae = linear_reg.eval_loss(test_pred, actual_y)
             print('Final Test Results:  Test RMSE: {:2f} | Test MAE: {:2f}'.format(test_rmse, test_mae))
 
             weights_biases = linear_reg.weights_and_biases()
 
             # Non-scrambled data plot
-            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=None,
+            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
                      data=raw_data,
-                     time_start=1, time_end=5000,
+                     time_start=plot_start, time_end=plot_end,
                      adv_plot=False)
 
     return raw_data, heading_names, linear_reg, weights_biases
@@ -460,21 +499,16 @@ if __name__ == "__main__":
     # Seed NumPy and TensorFlow with the meaning of life
     random_seed(42)
 
-    # Specify data, model and normalization paths, Linux
-    # Data_path = '/home/rui/Documents/Willowglen/data/PresConstr_Data/FL_Pres.csv'
-    # Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-    #              'linear_regression_models/Objects/checkpoints/lsFL.ckpt'
-    # Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-    #             'linear_regression_models/Objects/normalization/lsFL.pickle'
-
-    # Specify data, model and normalization paths, MacOS
-    Data_path = '/Users/ruinian/Documents/Willowglen/data/PresConstr_Data/Chey_Pres.csv'
-    Model_path = '/Users/ruinian/Documents/Willowglen//Suncor_Phase2/' \
-                 'pressure_models/Cheyenne/checkpoints/lsChey.ckpt'
-    Norm_path = '/Users/ruinian/Documents/Willowglen//Suncor_Phase2/' \
-                'pressure_models/Cheyenne/normalization/lsChey.pickle'
+    # Specify data, model and normalization paths
+    Data_path = '/home/rui/Documents/Willowglen/data/PresConstr_Data/' \
+                'Chey_Pres.csv'
+    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_const_models/' \
+                 'Cheyenne/checkpoints/lsChey.ckpt'
+    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_const_models/' \
+                'Cheyenne/normalization/lsChey.pickle'
 
     Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
-                                                                      shuffle=True, lr=0.003, minibatch_size=2048,
+                                                                      shuffle=True, lr=0.001, minibatch_size=2048,
                                                                       epochs=100, lambd=0.001,
-                                                                      testing=False, loading=False)
+                                                                      testing=False, loading=False,
+                                                                      plot_start=5000, plot_end=6000)
