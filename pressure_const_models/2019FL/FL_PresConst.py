@@ -500,15 +500,15 @@ if __name__ == "__main__":
     random_seed(42)
 
     # Specify data, model and normalization paths
-    Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
-                '2019AllData.csv'
-    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                 'linear_regression_models/Objects/checkpoints/lsFL.ckpt'
-    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                'linear_regression_models/Objects/normalization/lsFL.pickle'
+    Data_path = '/home/rui/Documents/Willowglen/data/2019PresConstr_Data/' \
+                '2019FL_Pres.csv'
+    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_const_models/2019FL' \
+                 '/checkpoints/ConstFL.ckpt'
+    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_const_models/2019FL' \
+                '/normalization/ConstFL.pickle'
 
-    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
-                                                                      shuffle=True, lr=0.001, minibatch_size=2048,
-                                                                      epochs=300, lambd=0.001,
-                                                                      testing=True, loading=False,
-                                                                      plot_start=5000, plot_end=6000)
+    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path,
+                                                                      test_size=0.05, shuffle=True,
+                                                                      lr=0.001, minibatch_size=8192,
+                                                                      epochs=2800, lambd=0.001,
+                                                                      testing=False, loading=False)
