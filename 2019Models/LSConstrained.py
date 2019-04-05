@@ -412,8 +412,10 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
 
             # Evaluate loss
             rmse, mae = linear_reg.eval_loss(pred, test_y)
+            se = standard_error(pred, test_y)
+            r2 = r_squared(pred, test_y)
 
-            print('Test RMSE: {:2f} | Test MAE: {:2f}'.format(rmse, mae))
+            print('Test RMSE: {:2f} | Test MAE: {:2f} | SE: {:2f} | R2: {:2f}'.format(rmse, mae, se, r2))
 
             plt.plot(pred[:-1], label='Predictions')
             plt.plot(test_y[:-1], label='Actual')
@@ -514,7 +516,7 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
 
             weights_biases = linear_reg.weights_and_biases()
 
-    return raw_data, heading_names, linear_reg, weights_biases
+    return heading_names, weights_biases
 
 
 if __name__ == "__main__":
@@ -525,12 +527,11 @@ if __name__ == "__main__":
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
                 '2019AllData.csv'
-    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/' \
-                 'Objects/checkpoints/test2019.ckpt'
-    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/' \
-                'Objects/normalization/test2019.pickle'
+    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/ls2019.ckpt'
+    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/normalization/ls2019.pickle'
 
-    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
-                                                                      shuffle=True, lr=0.001, minibatch_size=2048,
-                                                                      train_size=0.95, epochs=700, lambd=0.001,
-                                                                      testing=False, loading=False, num_of_const=10)
+    Heading_names, Weights_biases = train_model(Data_path, Model_path, Norm_path,
+                                                train_size=0.85, test_size=0.15, shuffle=False,
+                                                lr=0.001, minibatch_size=4096, epochs=700, lambd=0.001,
+                                                testing=True, loading=False,
+                                                num_of_const=10)
