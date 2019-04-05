@@ -29,7 +29,6 @@ sys.path.insert(0, '/home/rui/Documents/Willowglen/Suncor_Phase2')
 
 from EWMA import ewma
 from Seq_plot import seq_pred
-from MinMaxNorm import MinMaxNormalization
 
 warnings.filterwarnings('ignore')
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'
@@ -358,23 +357,6 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
     train_y = train_y.reshape(-1, 1)
     test_y = test_y.reshape(-1, 1)
 
-    # Normalization
-    if testing:
-        min_max_normalization = load(norm_path)
-
-    else:
-        min_max_normalization = MinMaxNormalization(np.concatenate([train_y, train_x], axis=1))
-
-    training_data = min_max_normalization(np.concatenate([train_y, train_x], axis=1))
-    testing_data = min_max_normalization(np.concatenate([test_y, test_x], axis=1))
-
-    # Reshape for TensorFlow
-    train_x = training_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
-    test_x = testing_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
-
-    train_y = training_data[:, 0].reshape(-1, 1)
-    test_y = testing_data[:, 0].reshape(-1, 1)
-
     # Test cases for NaN values
     assert(not np.isnan(train_x).any())
     assert(not np.isnan(test_x).any())
@@ -396,10 +378,6 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             # Pred testing values
             pred = linear_reg.test(test_x)
 
-            # Unnormalize
-            pred = min_max_normalization.unnormalize_y(pred)
-            test_y = min_max_normalization.unnormalize_y(test_y)
-
             # Evaluate loss
             rmse, mae = linear_reg.eval_loss(pred, test_y)
 
@@ -408,7 +386,7 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             weights_biases = linear_reg.weights_and_biases()
 
             # Non-scrambled data plot
-            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
+            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=None,
                      data=raw_data,
                      time_start=plot_start, time_end=plot_end,
                      adv_plot=False)
@@ -445,20 +423,12 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
 
                         train_pred = linear_reg.test(features=train_x)
 
-                        # Unnormalize data
-                        train_pred = min_max_normalization.unnormalize_y(train_pred)
-                        actual_y = min_max_normalization.unnormalize_y(train_y)
-
                         # Evaluate error
-                        train_rmse, train_mae = linear_reg.eval_loss(train_pred, actual_y)
+                        train_rmse, train_mae = linear_reg.eval_loss(train_pred, train_y)
 
                         test_pred = linear_reg.test(features=test_x)
 
-                        # Unnormalize data
-                        test_pred = min_max_normalization.unnormalize_y(test_pred)
-                        actual_y = min_max_normalization.unnormalize_y(test_y)
-
-                        test_rmse, test_mae = linear_reg.eval_loss(test_pred, actual_y)
+                        test_rmse, test_mae = linear_reg.eval_loss(test_pred, test_y)
 
                         print('Epoch: {} | Loss: {:2f} | Train RMSE: {:2f} | Test RMSE: {:2f}'.format(epoch,
                                                                                                       current_loss,
@@ -469,24 +439,16 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             linear_reg.saver.save(sess, model_path)
             print("Model saved at: {}".format(model_path))
 
-            # Save normalizer
-            save(min_max_normalization, norm_path)
-            print("Normalization saved at: {}".format(norm_path))
-
             # Final test
             test_pred = linear_reg.test(features=test_x)
 
-            # Unnormalize data
-            test_pred = min_max_normalization.unnormalize_y(test_pred)
-            actual_y = min_max_normalization.unnormalize_y(test_y)
-
-            test_rmse, test_mae = linear_reg.eval_loss(test_pred, actual_y)
+            test_rmse, test_mae = linear_reg.eval_loss(test_pred, test_y)
             print('Final Test Results:  Test RMSE: {:2f} | Test MAE: {:2f}'.format(test_rmse, test_mae))
 
             weights_biases = linear_reg.weights_and_biases()
 
             # Non-scrambled data plot
-            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
+            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=None,
                      data=raw_data,
                      time_start=plot_start, time_end=plot_end,
                      adv_plot=False)
@@ -509,6 +471,6 @@ if __name__ == "__main__":
 
     Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
                                                                       shuffle=True, lr=0.001, minibatch_size=2048,
-                                                                      epochs=100, lambd=0.001,
-                                                                      testing=False, loading=False,
+                                                                      epochs=2500, lambd=0.001,
+                                                                      testing=False, loading=True,
                                                                       plot_start=5000, plot_end=6000)

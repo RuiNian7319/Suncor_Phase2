@@ -30,6 +30,8 @@ sys.path.insert(0, '/home/rui/Documents/Willowglen/Suncor_Phase2')
 from EWMA import ewma
 from Seq_plot import seq_pred
 from MinMaxNorm import MinMaxNormalization
+from Std_Err import standard_error
+from Rsquared import r_squared
 
 warnings.filterwarnings('ignore')
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'
@@ -500,8 +502,15 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             test_pred = min_max_normalization.unnormalize_y(test_pred)
             actual_y = min_max_normalization.unnormalize_y(test_y)
 
+            # Evaluation Metrics
             test_rmse, test_mae = linear_reg.eval_loss(test_pred, actual_y)
-            print('Final Test Results:  Test RMSE: {:2f} | Test MAE: {:2f}'.format(test_rmse, test_mae))
+            se = standard_error(test_pred, actual_y)
+            r2 = r_squared(test_pred, actual_y)
+
+            print('Final Test Results:  Test RMSE: {:2f} | Test MAE: {:2f} | SE: {:2f} | R2: {:2f}'.format(test_rmse,
+                                                                                                           test_mae,
+                                                                                                           se,
+                                                                                                           r2))
 
             weights_biases = linear_reg.weights_and_biases()
 
@@ -515,13 +524,13 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
-                'data_test.csv'
+                '2019AllData.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/' \
                  'Objects/checkpoints/test2019.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/' \
                 'Objects/normalization/test2019.pickle'
 
-    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.99,
-                                                                      shuffle=False, lr=0.001, minibatch_size=2048,
-                                                                      train_size=0.01, epochs=700, lambd=0.001,
-                                                                      testing=True, loading=False, num_of_const=10)
+    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
+                                                                      shuffle=True, lr=0.001, minibatch_size=2048,
+                                                                      train_size=0.95, epochs=700, lambd=0.001,
+                                                                      testing=False, loading=False, num_of_const=10)
