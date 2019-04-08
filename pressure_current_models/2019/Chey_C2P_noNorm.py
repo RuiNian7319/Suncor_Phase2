@@ -126,8 +126,6 @@ class LinearRegression:
                epochs: Number of passes through the whole data set
                 lambd: Normalization parameter for L1 or L2 normalization
 
-         num_of_const: Numer of weights constrained
-
     Methods
        ---
                 train: Runs optimization on the ML model (adaptative momentum gradient descent)
@@ -138,10 +136,11 @@ class LinearRegression:
     """
 
     def __init__(self, session, train_x, train_y, test_x, test_y, lr=0.003, minibatch_size=64, train_size=0.9, epochs=5,
-                 lambd=0.001, num_of_const=10):
+                 lambd=0.001):
 
         """
         Notes: - Input must be in shape=[m, Nx]
+
         """
 
         # TensorFlow session
@@ -154,8 +153,7 @@ class LinearRegression:
         self.train_y = train_y
         self.test_y = test_y
 
-        self.nx_Cons = num_of_const
-        self.nx_noCons = train_x.shape[1] - self.nx_Cons
+        self.nx = train_x.shape[1]
         self.ny = 1
         self.m = train_x.shape[0]
         self.train_size = train_size
@@ -169,24 +167,21 @@ class LinearRegression:
         self.total_batch_number = int((self.m / self.minibatch_size) * self.train_size)
 
         # Tensorflow variables
-        self.X1 = tf.placeholder(dtype=tf.float32, shape=[None, self.nx_Cons])
-        self.X2 = tf.placeholder(dtype=tf.float32, shape=[None, self.nx_noCons])
-        self.y = tf.placeholder(dtype=tf.float32, shape=[None, self.ny])
+        with tf.name_scope('Inputs'):
+            self.X = tf.placeholder(dtype=tf.float32, shape=[None, self.nx])
+            self.y = tf.placeholder(dtype=tf.float32, shape=[None, self.ny])
 
-        self.W1 = tf.get_variable('Weights_Const', shape=[self.nx_Cons, self.ny],
-                                  initializer=tf.contrib.layers.xavier_initializer(),
-                                  constraint=lambda x: tf.clip_by_value(x, 0, np.infty))
+        with tf.name_scope('Model'):
+            self.W = tf.get_variable('Weights', shape=[self.nx, self.ny],
+                                     initializer=tf.contrib.layers.xavier_initializer())
 
-        self.W2 = tf.get_variable('Weights_NoConst', shape=[self.nx_noCons, self.ny],
-                                  initializer=tf.contrib.layers.xavier_initializer())
-
-        self.b = tf.get_variable('Biases', shape=[1, self.ny], initializer=tf.constant_initializer())
+            self.b = tf.get_variable('Biases', shape=[1, self.ny], initializer=tf.constant_initializer())
 
         # Model
-        self.z = tf.matmul(self.X1, self.W1) + tf.matmul(self.X2, self.W2) + self.b
+        self.z = tf.matmul(self.X, self.W) + self.b
 
         # Mean squared error loss function
-        self.regularizer = tf.nn.l2_loss(self.W1) + tf.nn.l2_loss(self.W2)
+        self.regularizer = tf.nn.l2_loss(self.W)
         self.loss = tf.reduce_mean(tf.losses.mean_squared_error(labels=self.y, predictions=self.z) +
                                    self.lambd * self.regularizer)
 
@@ -201,12 +196,12 @@ class LinearRegression:
         self.loss_history = []
 
     def __str__(self):
-        return "Linear Regression using {} features.".format(self.nx_Cons + self.nx_noCons)
+        return "Linear Regression using {} features.".format(self.nx)
 
     def __repr__(self):
         return "LinearRegression()"
 
-    def train(self, const_features, unconst_features, labels):
+    def train(self, features, labels):
         """
         Description
            ---
@@ -220,11 +215,9 @@ class LinearRegression:
 
         """
 
-        _ = self.sess.run(self.optimizer, feed_dict={self.y: labels,
-                                                     self.X1: const_features,
-                                                     self.X2: unconst_features})
+        _ = self.sess.run(self.optimizer, feed_dict={self.y: labels, self.X: features})
 
-    def test(self, const_features, unconst_features):
+    def test(self, features):
         """
         Description
            ---
@@ -242,10 +235,9 @@ class LinearRegression:
 
         """
 
-        return self.sess.run(self.z, feed_dict={self.X1: const_features,
-                                                self.X2: unconst_features})
+        return self.sess.run(self.z, feed_dict={self.X: features})
 
-    def loss_check(self, const_features, unconst_features, labels):
+    def loss_check(self, features, labels):
         """
         Description
            ---
@@ -264,9 +256,7 @@ class LinearRegression:
 
         """
 
-        cur_loss = self.sess.run(self.loss, feed_dict={self.y: labels,
-                                                       self.X1: const_features,
-                                                       self.X2: unconst_features})
+        cur_loss = self.sess.run(self.loss, feed_dict={self.y: labels, self.X: features})
         self.loss_history.append(cur_loss)
         return cur_loss
 
@@ -282,11 +272,8 @@ class LinearRegression:
               weights/biases: Weights and bias of the model
 
         """
-        const_param = self.sess.run(self.W1)
-        unconst_param = self.sess.run(self.W2)
-        bias = self.sess.run(self.b)
 
-        return const_param, unconst_param, bias
+        return self.sess.run([self.W, self.b])
 
     @staticmethod
     def eval_loss(pred, actual):
@@ -320,7 +307,7 @@ class LinearRegression:
 
 
 def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=2048,
-                train_size=0.9, epochs=30, lambd=0.001, testing=False, loading=False, num_of_const=10):
+                epochs=30, lambd=0.001, testing=False, loading=False, plot_start=1, plot_end=5000):
     """
     Description
        ---
@@ -341,6 +328,9 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
                   lambd: Regularization term
                 testing: Training or testing?
                 loading: If you want to load an old model for further training
+             plot_start: Index for the start of the validation plot
+               plot_end: Index for the end of the validation plot
+
 
     Returns
        ---
@@ -381,35 +371,34 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
 
         # Build linear regression object
         linear_reg = LinearRegression(sess, train_x, train_y, test_x, test_y, lr=lr, minibatch_size=minibatch_size,
-                                      train_size=train_size, epochs=epochs, lambd=lambd, num_of_const=num_of_const)
+                                      train_size=(1 - test_size), epochs=epochs, lambd=lambd)
 
         # If testing, just run it
         if testing:
             # Restore model
             linear_reg.saver.restore(sess, save_path=model_path)
 
-            # Pred testing values.  First num_of_const variables are constrained, remaining are unconstrained
-            pred = linear_reg.test(test_x[:, :num_of_const], test_x[:, linear_reg.nx_Cons:])
+            # Pred testing values
+            pred = linear_reg.test(test_x)
 
             # Evaluate loss
             rmse, mae = linear_reg.eval_loss(pred, test_y)
             se = standard_error(pred, test_y)
             r2 = r_squared(pred, test_y)
 
-            plt.plot(pred[45000:50000], label='Predicted')
-            plt.plot(test_y[45000:50000], label='Test Data')
-
-            plt.legend(loc='0', frameon=False)
-
-            plt.show()
-
             print('Test RMSE: {:2f} | Test MAE: {:2f} | SE: {:2f} | R2: {:2f}'.format(rmse, mae, se, r2))
 
-            cons_par, uncons_par, biases = linear_reg.weights_and_biases()
+            weights_biases = linear_reg.weights_and_biases()
+
+            # Non-scrambled data plot
+            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=None,
+                     data=raw_data,
+                     time_start=plot_start, time_end=plot_end,
+                     adv_plot=False)
 
         else:
 
-            # Load an old model for further training
+            # Load old model for further testing
             if loading:
                 linear_reg.saver.restore(sess, Model_path)
 
@@ -427,30 +416,22 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
                     minibatch_y = train_y[batch_index:batch_index + linear_reg.minibatch_size, :]
 
                     # Optimize machine learning model
-                    linear_reg.train(const_features=minibatch_x[:, :num_of_const],
-                                     unconst_features=minibatch_x[:, linear_reg.nx_Cons:],
-                                     labels=minibatch_y)
+                    linear_reg.train(features=minibatch_x, labels=minibatch_y)
 
                     # Record loss
                     if i % 10 == 0:
-                        _ = linear_reg.loss_check(const_features=train_x[:, :num_of_const],
-                                                  unconst_features=train_x[:, linear_reg.nx_Cons:],
-                                                  labels=train_y)
+                        _ = linear_reg.loss_check(features=train_x, labels=train_y)
 
                     # Evaluate train and test losses
                     if i % 150 == 0:
-                        current_loss = linear_reg.loss_check(const_features=train_x[:, :num_of_const],
-                                                             unconst_features=train_x[:, linear_reg.nx_Cons:],
-                                                             labels=train_y)
+                        current_loss = linear_reg.loss_check(features=train_x, labels=train_y)
 
-                        train_pred = linear_reg.test(const_features=train_x[:, :num_of_const],
-                                                     unconst_features=train_x[:, linear_reg.nx_Cons:])
+                        train_pred = linear_reg.test(features=train_x)
 
                         # Evaluate error
                         train_rmse, train_mae = linear_reg.eval_loss(train_pred, train_y)
 
-                        test_pred = linear_reg.test(const_features=test_x[:, :num_of_const],
-                                                    unconst_features=test_x[:, linear_reg.nx_Cons:])
+                        test_pred = linear_reg.test(features=test_x)
 
                         test_rmse, test_mae = linear_reg.eval_loss(test_pred, test_y)
 
@@ -464,8 +445,7 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             print("Model saved at: {}".format(model_path))
 
             # Final test
-            test_pred = linear_reg.test(const_features=test_x[:, :num_of_const],
-                                        unconst_features=test_x[:, linear_reg.nx_Cons:])
+            test_pred = linear_reg.test(features=test_x)
 
             test_rmse, test_mae = linear_reg.eval_loss(test_pred, test_y)
             se = standard_error(test_pred, test_y)
@@ -476,9 +456,15 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
                                                                                                            se,
                                                                                                            r2))
 
-            cons_par, uncons_par, biases = linear_reg.weights_and_biases()
+            weights_biases = linear_reg.weights_and_biases()
 
-    return raw_data, heading_names, linear_reg, cons_par, uncons_par, biases
+            # Non-scrambled data plot
+            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=None,
+                     data=raw_data,
+                     time_start=plot_start, time_end=plot_end,
+                     adv_plot=False)
+
+    return raw_data, heading_names, linear_reg, weights_biases
 
 
 if __name__ == "__main__":
@@ -487,14 +473,15 @@ if __name__ == "__main__":
     random_seed(42)
 
     # Specify data, model and normalization paths
-    Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
-                '2019AllData.csv'
-    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/ls2019_noNorm.ckpt'
-    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/normalization/ls2019_noNorm.pickle'
+    Data_path = '/home/rui/Documents/Willowglen/data/2019PresConstr_Data/' \
+                '2019Chey_Pres.csv'
+    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_const_models/2019Chey' \
+                 '/checkpoints/ConstChey.ckpt'
+    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_const_models/2019Chey' \
+                '/normalization/ConstChey.pickle'
 
-    Raw_data, Heading, Model, Const_par, Uncon_Par, Bias = train_model(Data_path, Model_path, Norm_path,
-                                                                       train_size=0.01, test_size=0.99, shuffle=False,
-                                                                       lr=0.001, minibatch_size=8192,
-                                                                       epochs=10000, lambd=0.001,
-                                                                       testing=True, loading=True,
-                                                                       num_of_const=10)
+    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path,
+                                                                      test_size=0.99, shuffle=False,
+                                                                      lr=0.001, minibatch_size=8192,
+                                                                      epochs=8000, lambd=0.001,
+                                                                      testing=True, loading=True)
