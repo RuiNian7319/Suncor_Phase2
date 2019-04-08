@@ -1,2 +1,2 @@
-model_checkpoint_path: "/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_const_models/2019Ault/checkpoints/ConstAult.ckpt"
-all_model_checkpoint_paths: "/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_const_models/2019Ault/checkpoints/ConstAult.ckpt"
+model_checkpoint_path: "/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_const_models/2019Ault/checkpoints/ConstAult2.ckpt"
+all_model_checkpoint_paths: "/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_const_models/2019Ault/checkpoints/ConstAult2.ckpt"
