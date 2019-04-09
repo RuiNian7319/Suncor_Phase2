@@ -500,15 +500,15 @@ if __name__ == "__main__":
     random_seed(42)
 
     # Specify data, model and normalization paths
-    Data_path = '/home/rui/Documents/Willowglen/data/2019PresConstr_Data/' \
-                '2019Chey_Pres.csv'
-    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_const_models/2019Chey' \
-                 '/checkpoints/ConstChey.ckpt'
-    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_const_models/2019Chey' \
-                '/normalization/ConstChey.pickle'
+    Data_path = '/home/rui/Documents/Willowglen/data/2019Cur2Pres/' \
+                '2019FLVFD.csv'
+    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_current_models/2019' \
+                 '/checkpoints/FL.ckpt'
+    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_current_models/2019' \
+                '/normalization/FL.pickle'
 
     Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path,
                                                                       test_size=0.05, shuffle=True,
                                                                       lr=0.001, minibatch_size=8192,
-                                                                      epochs=2800, lambd=0.001,
-                                                                      testing=False, loading=True)
+                                                                      epochs=10000, lambd=0.005,
+                                                                      testing=False, loading=False)
