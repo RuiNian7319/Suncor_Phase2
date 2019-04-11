@@ -16,6 +16,7 @@ import tensorflow as tf
 
 import gc
 
+import time
 import os
 
 from sklearn.model_selection import train_test_split
@@ -531,18 +532,23 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
 
 if __name__ == "__main__":
 
+    start = time.time()
+
     # Seed NumPy and TensorFlow with the meaning of life
     random_seed(42)
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
-                'data_test.csv'
-    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/' \
-                 'Objects/checkpoints/nn_test2019.ckpt'
-    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/linear_regression_models/' \
-                'Objects/normalization/nn_test2019.pickle'
+                '2019AllData.csv'
+    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models' \
+                 '/checkpoints/nn2019.ckpt'
+    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models' \
+                '/normalization/nn2019.pickle'
 
-    Raw_data, Heading_names, NN = train_model(Data_path, Model_path, Norm_path, test_size=0.99,
-                                              shuffle=False, lr=0.001, minibatch_size=2048,
-                                              epochs=225, lambd=0.001,
-                                              testing=True, loading=False)
+    Raw_data, Heading_names, NN = train_model(Data_path, Model_path, Norm_path, test_size=0.01,
+                                              shuffle=True, lr=0.001, minibatch_size=8192,
+                                              epochs=1000, lambd=0.001,
+                                              testing=False, loading=True)
+
+    end = time.time()
+    print('Total simulation time: {}'.format(end - start))
