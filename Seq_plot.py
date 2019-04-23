@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 
 def seq_pred(session, model, features, data, normalizer, time_start, time_end, xlabel='Time', ylabel='Flow Rate',
-             adv_plot=True):
+             adv_plot=True, savefig=False):
     """
     Description
         ----
@@ -101,5 +101,8 @@ def seq_pred(session, model, features, data, normalizer, time_start, time_end, x
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
         plt.legend(loc=0, frameon=False)
+
+        if savefig:
+            plt.savefig('figure.eps', format='eps', dpi=1000)
 
         plt.show()

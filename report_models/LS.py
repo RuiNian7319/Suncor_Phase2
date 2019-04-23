@@ -30,6 +30,7 @@ sys.path.insert(0, '/home/rui/Documents/Willowglen/Suncor_Phase2')
 from EWMA import ewma
 from Seq_plot import seq_pred
 from MinMaxNorm import MinMaxNormalization
+from Rsquared import r_squared
 
 warnings.filterwarnings('ignore')
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'
@@ -305,7 +306,8 @@ class LinearRegression:
 
 
 def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=2048,
-                epochs=30, lambd=0.001, testing=False, loading=False, plot_start=1, plot_end=5000):
+                epochs=30, lambd=0.001, testing=False, loading=False, plot_start=1, plot_end=5000, savefig=False,
+                xlabel='Time, t (mins)', ylabel='Flow rate, Q (bbl/h)'):
     """
     Description
        ---
@@ -402,8 +404,9 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
 
             # Evaluate loss
             rmse, mae = linear_reg.eval_loss(pred, test_y)
+            r2 = r_squared(pred, test_y)
 
-            print('Test RMSE: {:2f} | Test MAE: {:2f}'.format(rmse, mae))
+            print('Test RMSE: {:2f} | Test MAE: {:2f} | R2: {:2f}'.format(rmse, mae, r2))
 
             weights_biases = linear_reg.weights_and_biases()
 
@@ -411,7 +414,7 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
                      data=raw_data,
                      time_start=plot_start, time_end=plot_end,
-                     adv_plot=False)
+                     adv_plot=False, savefig=savefig, xlabel=xlabel, ylabel=ylabel)
 
         else:
 
@@ -481,7 +484,8 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             actual_y = min_max_normalization.unnormalize_y(test_y)
 
             test_rmse, test_mae = linear_reg.eval_loss(test_pred, actual_y)
-            print('Final Test Results:  Test RMSE: {:2f} | Test MAE: {:2f}'.format(test_rmse, test_mae))
+            r2 = r_squared(test_pred, actual_y)
+            print('Final Test Results:  Test RMSE: {:2f} | Test MAE: {:2f} | R2: {:2f}'.format(test_rmse, test_mae, r2))
 
             weights_biases = linear_reg.weights_and_biases()
 
@@ -489,7 +493,7 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
                      data=raw_data,
                      time_start=plot_start, time_end=plot_end,
-                     adv_plot=False)
+                     adv_plot=False, savefig=savefig, xlabel=xlabel, ylabel=ylabel)
 
     return raw_data, heading_names, linear_reg, weights_biases
 
@@ -501,14 +505,15 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/report_datasets/' \
-                'ls_data.csv'
+                'ls_test_data.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
                  'report_models/checkpoints/ls.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
                 'report_models/normalization/ls.pickle'
 
-    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
-                                                                      shuffle=True, lr=0.001, minibatch_size=8192,
-                                                                      epochs=100, lambd=0.001,
-                                                                      testing=False, loading=False,
-                                                                      plot_start=5000, plot_end=6000)
+    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path,
+                                                                      lr=0.001, minibatch_size=8192,
+                                                                      epochs=850, lambd=0.001,
+                                                                      test_size=0.999,
+                                                                      shuffle=True, testing=True, loading=False,
+                                                                      plot_start=2500, plot_end=4500, savefig=True)

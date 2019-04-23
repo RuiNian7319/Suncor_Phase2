@@ -423,7 +423,7 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             plt.xlabel('Time (min)')
             plt.ylabel('Normalized Flow Rate (bbl/h)')
 
-            plt.legend(loc='0', frameon=None)
+            plt.legend(frameon=False)
             plt.show()
 
             weights_biases = linear_reg.weights_and_biases()
@@ -525,13 +525,15 @@ if __name__ == "__main__":
     random_seed(42)
 
     # Specify data, model and normalization paths
-    Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
-                '2019AllData.csv'
-    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/ls2019.ckpt'
-    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/normalization/ls2019.pickle'
+    Data_path = '/home/rui/Documents/Willowglen/data/report_datasets/' \
+                'ls_test_data.csv'
+    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
+                 'report_models/checkpoints/lsConst.ckpt'
+    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
+                'report_models/normalization/lsConst.pickle'
 
     Heading_names, Weights_biases = train_model(Data_path, Model_path, Norm_path,
-                                                train_size=0.85, test_size=0.15, shuffle=False,
-                                                lr=0.001, minibatch_size=4096, epochs=700, lambd=0.001,
+                                                train_size=0.001, test_size=0.999, shuffle=False,
+                                                lr=0.001, minibatch_size=4096, epochs=850, lambd=0.001,
                                                 testing=True, loading=False,
                                                 num_of_const=10)
