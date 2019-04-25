@@ -424,7 +424,6 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             plt.ylabel('Flow Rate, Q (bbl/h)')
 
             plt.legend(frameon=False)
-            plt.savefig('08ConstrainedLS.eps', format='eps', dpi=1000)
             plt.show()
 
             weights_biases = linear_reg.weights_and_biases()

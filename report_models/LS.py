@@ -505,15 +505,15 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/report_datasets/' \
-                'ls_test_data.csv'
+                'ls_test_data_sqrt.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                 'report_models/checkpoints/ls.ckpt'
+                 'report_models/checkpoints/ls_sqrt.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                'report_models/normalization/ls.pickle'
+                'report_models/normalization/ls_sqrt.pickle'
 
     Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path,
                                                                       lr=0.001, minibatch_size=8192,
-                                                                      epochs=850, lambd=0.001,
-                                                                      test_size=0.999,
+                                                                      epochs=1500, lambd=0.001,
+                                                                      test_size=0.05,
                                                                       shuffle=True, testing=True, loading=False,
                                                                       plot_start=2500, plot_end=4500, savefig=True)
