@@ -417,13 +417,14 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
 
             print('Test RMSE: {:2f} | Test MAE: {:2f} | SE: {:2f} | R2: {:2f}'.format(rmse, mae, se, r2))
 
-            plt.plot(pred[:-1], label='Predictions')
-            plt.plot(test_y[:-1], label='Actual')
+            plt.plot(pred[2500:4500], label='Predictions')
+            plt.plot(test_y[2500:4500], label='Actual')
 
-            plt.xlabel('Time (min)')
-            plt.ylabel('Normalized Flow Rate (bbl/h)')
+            plt.xlabel('Time, t (min)')
+            plt.ylabel('Flow Rate, Q (bbl/h)')
 
             plt.legend(frameon=False)
+            plt.savefig('08ConstrainedLS.eps', format='eps', dpi=1000)
             plt.show()
 
             weights_biases = linear_reg.weights_and_biases()
@@ -533,7 +534,7 @@ if __name__ == "__main__":
                 'report_models/normalization/lsConst.pickle'
 
     Heading_names, Weights_biases = train_model(Data_path, Model_path, Norm_path,
-                                                train_size=0.001, test_size=0.999, shuffle=False,
-                                                lr=0.001, minibatch_size=4096, epochs=850, lambd=0.001,
+                                                train_size=0.01, test_size=0.99, shuffle=False,
+                                                lr=0.001, minibatch_size=8192, epochs=850, lambd=0.001,
                                                 testing=True, loading=False,
                                                 num_of_const=10)

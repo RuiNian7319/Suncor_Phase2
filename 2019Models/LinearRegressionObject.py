@@ -501,7 +501,7 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
-                '2019AllData.csv'
+                'subset_data.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
                  'linear_regression_models/Objects/checkpoints/lsFL.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
@@ -509,6 +509,6 @@ if __name__ == "__main__":
 
     Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
                                                                       shuffle=True, lr=0.001, minibatch_size=2048,
-                                                                      epochs=300, lambd=0.001,
-                                                                      testing=True, loading=False,
+                                                                      epochs=900, lambd=0.001,
+                                                                      testing=False, loading=False,
                                                                       plot_start=5000, plot_end=6000)
