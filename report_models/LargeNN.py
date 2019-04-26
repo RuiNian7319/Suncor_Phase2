@@ -503,6 +503,9 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             plt.ylabel('Flow Rate, Q (bbl/h)')
 
             plt.legend(loc='0', frameon=False)
+
+            plt.savefig('08largenn_test.eps', format='eps', dpi=1000)
+
             plt.show()
 
         else:
@@ -594,11 +597,11 @@ if __name__ == "__main__":
     Data_path = '/home/rui/Documents/Willowglen/data/report_datasets/' \
                 'ls_data.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                 'report_models/checkpoints/Mednn.ckpt'
+                 'report_models/checkpoints/Largenn.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                'report_models/normalization/Mednn.pickle'
+                'report_models/normalization/Largenn.pickle'
 
     Raw_data, Heading_names, NN = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
-                                              shuffle=False, lr=0.001, minibatch_size=8192,
-                                              epochs=1200, lambd=0.001,
+                                              shuffle=True, lr=0.001, minibatch_size=8192,
+                                              epochs=1200, lambd=0.005,
                                               testing=False, loading=False)

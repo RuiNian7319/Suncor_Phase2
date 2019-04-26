@@ -481,6 +481,9 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             plt.ylabel('Flow Rate, Q (bbl/h)')
 
             plt.legend(loc='0', frameon=False)
+
+            plt.savefig('08mednn_test.eps', format='eps', dpi=1000)
+
             plt.show()
 
         else:
