@@ -542,13 +542,13 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/report_datasets/' \
-                'ls_data.csv'
+                'ls_set1_test.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                 'report_models/checkpoints/Smallnn.ckpt'
+                 'report_models/checkpoints/Smallnn2.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                'report_models/normalization/Smallnn.pickle'
+                'report_models/normalization/Smallnn2.pickle'
 
-    Raw_data, Heading_names, NN = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
+    Raw_data, Heading_names, NN = train_model(Data_path, Model_path, Norm_path, test_size=0.999,
                                               shuffle=False, lr=0.001, minibatch_size=8192,
-                                              epochs=700, lambd=0.001,
+                                              epochs=1500, lambd=0.001,
                                               testing=True, loading=False)

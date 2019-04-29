@@ -74,8 +74,8 @@ Squared data
 # data.to_csv('ls_data_sqrt.csv', index=False)
 # test_data.to_csv('ls_test_data_sqrt.csv', index=False)
 
-test_data = pd.read_csv(path + 'ls_test_data.csv')
-test_data = test_data.iloc[2500:, :]
+test_data = pd.read_csv(path + 'ls_set2.csv')
+test_data = test_data.iloc[:34500, :]
 
-test_data.to_csv('test_data_reduced.csv', index=False)
+test_data.to_csv('ls_set2_train.csv', index=False)
 
