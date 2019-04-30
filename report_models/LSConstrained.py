@@ -417,16 +417,14 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
 
             print('Test RMSE: {:2f} | Test MAE: {:2f} | SE: {:2f} | R2: {:2f}'.format(rmse, mae, se, r2))
 
-            plt.plot(pred, label='Predictions')
-            plt.plot(test_y, label='Actual')
+            plt.plot(pred[:2600], label='Predictions')
+            plt.plot(test_y[:2600], label='Actual')
 
             plt.xlabel('Time, t (min)')
             plt.ylabel('Flow Rate, Q (bbl/h)')
 
             plt.legend(frameon=False)
-
-            plt.savefig('08cluster1_valid.eps', format='eps', dpi=1000)
-
+            plt.savefig('08cluster1_test.eps', format='eps', dpi=1000)
             plt.show()
 
             weights_biases = linear_reg.weights_and_biases()
@@ -529,14 +527,14 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/report_datasets/' \
-                'ls_set2_train.csv'
+                'test_data.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                 'report_models/checkpoints/lsConst_LPV2.ckpt'
+                 'report_models/checkpoints/test_ls.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                'report_models/normalization/lsConst_LPV2.pickle'
+                'report_models/normalization/test_ls.pickle'
 
     Heading_names, Weights_biases = train_model(Data_path, Model_path, Norm_path,
-                                                train_size=0.95, test_size=0.05, shuffle=True,
-                                                lr=0.001, minibatch_size=8192, epochs=1200, lambd=0.001,
-                                                testing=False, loading=False,
+                                                train_size=0.01, test_size=0.99, shuffle=False,
+                                                lr=0.001, minibatch_size=1024, epochs=600, lambd=0.001,
+                                                testing=True, loading=False,
                                                 num_of_const=10)
