@@ -424,7 +424,17 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             plt.ylabel('Flow Rate, Q (bbl/h)')
 
             plt.legend(frameon=False)
-            plt.savefig('08cluster1_test.eps', format='eps', dpi=1000)
+            # plt.savefig('08cluster1_test.eps', format='eps', dpi=1000)
+            plt.show()
+
+            """
+            Residual Analysis
+            """
+            residuals = pred - test_y
+            plt.plot(residuals)
+            plt.show()
+
+            plt.acorr(residuals[:, 0], maxlags=100)
             plt.show()
 
             weights_biases = linear_reg.weights_and_biases()
@@ -527,11 +537,11 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/report_datasets/' \
-                'test_data.csv'
+                'test_data_reduced.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                 'report_models/checkpoints/test_ls.ckpt'
+                 'report_models/checkpoints/lsConst.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                'report_models/normalization/test_ls.pickle'
+                'report_models/normalization/lsConst.pickle'
 
     Heading_names, Weights_biases = train_model(Data_path, Model_path, Norm_path,
                                                 train_size=0.01, test_size=0.99, shuffle=False,

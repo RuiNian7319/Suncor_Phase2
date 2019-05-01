@@ -443,16 +443,29 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             r2 = r_squared(pred, test_y)
             print('Final Test Results:  Test RMSE: {:2f} | Test MAE: {:2f} | R2: {:2f}'.format(rmse, mae, r2))
 
-            plt.plot(pred[:-500], label='Predictions')
-            plt.plot(test_y[:-500], label='Actual')
+            plt.plot(pred[:-4900], label='Predictions')
+            plt.plot(test_y[:-4900], label='Actual')
 
             plt.xlabel('Time, t (min)')
             plt.ylabel('Flow Rate, Q (bbl/h)')
 
             plt.legend(loc='0', frameon=False)
 
-            plt.savefig('08smallnn_valid.eps', format='eps', dpi=1000)
+            # plt.savefig('08smallnn_valid.eps', format='eps', dpi=1000)
 
+            plt.show()
+
+            """
+            Residual Analysis
+            """
+            residuals = pred - test_y
+            plt.plot(residuals)
+            plt.ylim([-50, 50])
+            plt.show()
+
+            bad_residuals = test_y[0:-1] - test_y[1:]
+            plt.plot(bad_residuals)
+            plt.ylim([-50, 50])
             plt.show()
 
         else:

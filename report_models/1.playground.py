@@ -74,9 +74,9 @@ Squared data
 # data.to_csv('ls_data_sqrt.csv', index=False)
 # test_data.to_csv('ls_test_data_sqrt.csv', index=False)
 
-test_data = pd.read_csv(path + 'time_data.csv')
-train_data = test_data.iloc[:60000, :]
-test_data1 = test_data.iloc[60000:, :]
+data = pd.read_csv(path + 'test_data.csv')
 
-train_data.to_csv('train_data.csv', index=False)
-test_data1.to_csv('test_data.csv', index=False)
+numbers = np.random.normal(size=(100, 1))
+numbers2 = np.random.normal(size=(100, 1))
+
+a = np.correlate(numbers[:, 0], numbers2[:, 0], "full")
