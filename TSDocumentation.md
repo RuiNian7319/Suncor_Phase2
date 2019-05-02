@@ -57,7 +57,7 @@ R2: 0.98
 Test MAE: 77
 Test RMSE: 49
 Test R2: 0.89
-
+**Residuals are always positively biased**
 
 
 

@@ -518,15 +518,15 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/dynamic_data/' \
-                'y_set2_test.csv'
+                'diff_y_set1_train.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                 'dynamic_models/checkpoints/y_set2.ckpt'
+                 'dynamic_models/checkpoints/diff_y_set1.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                'dynamic_models/normalization/y_set2.pickle'
+                'dynamic_models/normalization/diff_y_set1.pickle'
 
     Pred, Label, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path,
                                                                          lr=0.001, minibatch_size=8192,
                                                                          epochs=2500, lambd=0.001,
-                                                                         test_size=0.999,
-                                                                         shuffle=True, testing=True, loading=False,
+                                                                         test_size=0.05,
+                                                                         shuffle=False, testing=True, loading=False,
                                                                          plot_start=2500, plot_end=4500, savefig=False)
