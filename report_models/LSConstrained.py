@@ -431,10 +431,13 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             Residual Analysis
             """
             residuals = pred - test_y
-            plt.plot(residuals)
+
+            # Auto correlation
+            plt.acorr(residuals[:, 0], maxlags=25)
             plt.show()
 
-            plt.acorr(residuals[:, 0], maxlags=100)
+            # Cross correlation
+            plt.xcorr(pred[:, 0], residuals[:, 0], maxlags=100)
             plt.show()
 
             weights_biases = linear_reg.weights_and_biases()

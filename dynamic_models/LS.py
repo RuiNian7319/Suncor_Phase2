@@ -504,12 +504,12 @@ if __name__ == "__main__":
     random_seed(42)
 
     # Specify data, model and normalization paths
-    Data_path = '/home/rui/Documents/Willowglen/data/report_datasets/' \
-                'ls_test_data_sqrt.csv'
+    Data_path = '/home/rui/Documents/Willowglen/data/dynamic_data/' \
+                'no_y_set1_train.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                 'report_models/checkpoints/ls_sqrt.ckpt'
+                 'dynamic_models/checkpoints/no_y_set1.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                'report_models/normalization/ls_sqrt.pickle'
+                'dynamic_models/normalization/no_y_set1.pickle'
 
     Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path,
                                                                       lr=0.001, minibatch_size=8192,

@@ -79,4 +79,4 @@ data = pd.read_csv(path + 'test_data.csv')
 numbers = np.random.normal(size=(100, 1))
 numbers2 = np.random.normal(size=(100, 1))
 
-a = np.correlate(numbers[:, 0], numbers2[:, 0], "full")
+a = np.correlate(numbers[:, 0], numbers[:, 0], "same")
