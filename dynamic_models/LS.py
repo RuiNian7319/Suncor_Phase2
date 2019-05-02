@@ -400,21 +400,34 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
 
             # Unnormalize
             pred = min_max_normalization.unnormalize_y(pred)
-            test_y = min_max_normalization.unnormalize_y(test_y)
+            actual_y = min_max_normalization.unnormalize_y(test_y)
 
             # Evaluate loss
-            rmse, mae = linear_reg.eval_loss(pred, test_y)
-            r2 = r_squared(pred, test_y)
+            rmse, mae = linear_reg.eval_loss(pred, actual_y)
+            r2 = r_squared(pred, actual_y)
 
             print('Test RMSE: {:2f} | Test MAE: {:2f} | R2: {:2f}'.format(rmse, mae, r2))
-
-            weights_biases = linear_reg.weights_and_biases()
 
             # Non-scrambled data plot
             seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
                      data=raw_data,
                      time_start=plot_start, time_end=plot_end,
                      adv_plot=False, savefig=savefig, xlabel=xlabel, ylabel=ylabel)
+
+            """
+            Residual Analysis
+            """
+            residuals = pred - actual_y
+
+            # Auto correlation
+            plt.acorr(residuals[:, 0], maxlags=25)
+            plt.show()
+
+            # Cross correlation
+            plt.xcorr(pred[:, 0], actual_y[:, 0], maxlags=25)
+            plt.show()
+
+            weights_biases = linear_reg.weights_and_biases()
 
         else:
 
@@ -477,14 +490,14 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             print("Normalization saved at: {}".format(norm_path))
 
             # Final test
-            test_pred = linear_reg.test(features=test_x)
+            pred = linear_reg.test(features=test_x)
 
             # Unnormalize data
-            test_pred = min_max_normalization.unnormalize_y(test_pred)
+            pred = min_max_normalization.unnormalize_y(pred)
             actual_y = min_max_normalization.unnormalize_y(test_y)
 
-            test_rmse, test_mae = linear_reg.eval_loss(test_pred, actual_y)
-            r2 = r_squared(test_pred, actual_y)
+            test_rmse, test_mae = linear_reg.eval_loss(pred, actual_y)
+            r2 = r_squared(pred, actual_y)
             print('Final Test Results:  Test RMSE: {:2f} | Test MAE: {:2f} | R2: {:2f}'.format(test_rmse, test_mae, r2))
 
             weights_biases = linear_reg.weights_and_biases()
@@ -495,7 +508,7 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
                      time_start=plot_start, time_end=plot_end,
                      adv_plot=False, savefig=savefig, xlabel=xlabel, ylabel=ylabel)
 
-    return raw_data, heading_names, linear_reg, weights_biases
+    return pred, actual_y, heading_names, linear_reg, weights_biases
 
 
 if __name__ == "__main__":
@@ -505,15 +518,15 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/dynamic_data/' \
-                'no_y_set1_train.csv'
+                'y_set2_test.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                 'dynamic_models/checkpoints/no_y_set1.ckpt'
+                 'dynamic_models/checkpoints/y_set2.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                'dynamic_models/normalization/no_y_set1.pickle'
+                'dynamic_models/normalization/y_set2.pickle'
 
-    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path,
-                                                                      lr=0.001, minibatch_size=8192,
-                                                                      epochs=1500, lambd=0.001,
-                                                                      test_size=0.05,
-                                                                      shuffle=True, testing=True, loading=False,
-                                                                      plot_start=2500, plot_end=4500, savefig=True)
+    Pred, Label, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path,
+                                                                         lr=0.001, minibatch_size=8192,
+                                                                         epochs=2500, lambd=0.001,
+                                                                         test_size=0.999,
+                                                                         shuffle=True, testing=True, loading=False,
+                                                                         plot_start=2500, plot_end=4500, savefig=False)

@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/rui/Documents/Willowglen/Suncor_Phase2/dynamic_models/checkpoints/y_set2.ckpt"
+all_model_checkpoint_paths: "/home/rui/Documents/Willowglen/Suncor_Phase2/dynamic_models/checkpoints/y_set2.ckpt"
