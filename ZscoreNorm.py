@@ -24,8 +24,8 @@ class ZScoreNorm:
 
     Attributes
        -----
-         col_min:  The minimum value per feature
-         col_max:  The maximum value per feature
+            mean:  The minimum value per feature
+             std:  The maximum value per feature
      denominator:  col_max - col_min
 
 
@@ -36,14 +36,13 @@ class ZScoreNorm:
     """
 
     def __init__(self, data):
-        self.col_min = np.min(data, axis=0).reshape(1, data.shape[1])
-        self.col_max = np.max(data, axis=0).reshape(1, data.shape[1])
-        self.denominator = abs(self.col_max - self.col_min)
+        self.mean = np.mean(data, axis=0)
+        self.std = np.std(data, axis=0)
 
         # Fix divide by zero, replace value with 1 because these usually happen for boolean columns
-        for index, value in enumerate(self.denominator[0]):
+        for index, value in enumerate(self.std):
             if value == 0:
-                self.denominator[0][index] = 1
+                self.std[0][index] = 1
 
     def __call__(self, data):
         """
@@ -56,7 +55,9 @@ class ZScoreNorm:
                Data:  Normalized data.  In shape [Y | X]
         """
 
-        return np.divide((data - self.col_min), self.denominator)
+        de_mean = data - self.mean
+
+        return np.divide(de_mean, self.std)
 
     def unnormalize(self, data):
         """
@@ -69,8 +70,8 @@ class ZScoreNorm:
                Data:  unormalized data.  In shape [Y | X]
         """
 
-        data = np.multiply(data, self.denominator)
-        data = data + self.col_min
+        data = np.multiply(data, self.std)
+        data = data + self.mean
 
         return data
 
@@ -89,8 +90,8 @@ class ZScoreNorm:
                Data:  unormalized data.  In shape [Y | X]
         """
 
-        data = np.multiply(data, self.denominator[0, 0])
-        data = data + self.col_min[0, 0]
+        data = np.multiply(data, self.std[0])
+        data = data + self.mean[0]
 
         return data
 
@@ -98,16 +99,36 @@ class ZScoreNorm:
 if __name__ == "__main__":
 
     # Generate pseudo-random numbers
-    unnorm_numbers = np.random.normal(500, 15, size=[10, 10])
+    unnorm_numbers = np.random.normal(500, 15, size=[20, 100])
 
     # Construct normalization parameters
-    min_max_normalization = MinMaxNormalization(unnorm_numbers)
+    zscoreNorm = ZScoreNorm(unnorm_numbers)
 
     # Normalized data
-    norm_data = min_max_normalization(unnorm_numbers)
+    norm_data = zscoreNorm(unnorm_numbers)
 
-    # Plot the normalized values.  All values should be between 0 - 1
+    # Test the normalization call method
     for i in range(norm_data.shape[1]):
-        plt.plot(norm_data[i, :])
+        plt.plot(norm_data[:, i])
+        print('Column {} mean: {:2f}, std: {:2f}'.format(i,
+                                                         np.mean(norm_data[:, i]),
+                                                         np.std(norm_data[:, i])))
+
+    plt.show()
+
+    # Test the un-normalize method
+    re_unnorm_numbers = zscoreNorm.unnormalize(norm_data)
+
+    for i in range(re_unnorm_numbers.shape[1]):
+        diff = np.sum(re_unnorm_numbers[:, i] - unnorm_numbers[:, i])
+        print('Column {}, diff: {:2f}'.format(i, diff))
+
+    plt.show()
+
+    # Test the un-normalize y method
+    re_unnorm_y = zscoreNorm.unnormalize_y(norm_data[:, 0])
+
+    diff = np.sum(re_unnorm_y - unnorm_numbers[:, 0])
+    print('Diff: {:2f}'.format(diff))
 
     plt.show()

@@ -17,8 +17,8 @@ Test RMSE: 142
 Test R2: 0.63
 
 Set 2
-MAE: 111
-RMSE: 85
+MAE: 85
+RMSE: 111
 R2: 0.91
 
 Test MAE: 119
@@ -41,8 +41,8 @@ Test RMSE: 49
 Test R2: 0.83
 
 Set 1 (NN)
-MAE: 39
-RMSE: 16
+MAE: 16
+RMSE: 37
 R2: 0.99
 
 Test MAE: 45
@@ -50,12 +50,12 @@ Test RMSE: 63
 Test R2: 0.93
 
 Set 2
-MAE: 51
-RMSE: 36
+MAE: 36
+RMSE: 51
 R2: 0.98
 
-Test MAE: 77
-Test RMSE: 49
+Test MAE: 49
+Test RMSE: 77
 Test R2: 0.89
 **Residuals are always positively biased**
 
