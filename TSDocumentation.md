@@ -64,21 +64,12 @@ Test R2: 0.89
 
 Difference Models:
 
-Set 1
-MAE:
-RMSE:
-R2:
+Set 1 - Zscore norm and min max.
+Results not great
 
-Test MAE:
-Test RMSE:
-Test R2:
+Non-filtered flow rate
+ - Doesn't really work, too noisy
 
-Set 2
-MAE:
-RMSE:
-R2:
-
-Test MAE:
-Test RMSE:
-Test R2:
+Filtered flow rate
+ - Nopepope
 

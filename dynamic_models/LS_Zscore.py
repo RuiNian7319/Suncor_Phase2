@@ -29,7 +29,7 @@ sys.path.insert(0, '/home/rui/Documents/Willowglen/Suncor_Phase2')
 
 from EWMA import ewma
 from Seq_plot import seq_pred
-from MinMaxNorm import MinMaxNormalization
+from ZscoreNorm import ZScoreNorm
 from Rsquared import r_squared
 
 warnings.filterwarnings('ignore')
@@ -362,13 +362,13 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
 
     # Normalization
     if testing:
-        min_max_normalization = load(norm_path)
+        zscore_norm = load(norm_path)
 
     else:
-        min_max_normalization = MinMaxNormalization(np.concatenate([train_y, train_x], axis=1))
+        zscore_norm = ZScoreNorm(np.concatenate([train_y, train_x], axis=1))
 
-    training_data = min_max_normalization(np.concatenate([train_y, train_x], axis=1))
-    testing_data = min_max_normalization(np.concatenate([test_y, test_x], axis=1))
+    training_data = zscore_norm(np.concatenate([train_y, train_x], axis=1))
+    testing_data = zscore_norm(np.concatenate([test_y, test_x], axis=1))
 
     # Reshape for TensorFlow
     train_x = training_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
@@ -399,8 +399,8 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             pred = linear_reg.test(test_x)
 
             # Unnormalize
-            pred = min_max_normalization.unnormalize_y(pred)
-            actual_y = min_max_normalization.unnormalize_y(test_y)
+            pred = zscore_norm.unnormalize_y(pred)
+            actual_y = zscore_norm.unnormalize_y(test_y)
 
             # Evaluate loss
             rmse, mae = linear_reg.eval_loss(pred, actual_y)
@@ -409,10 +409,11 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             print('Test RMSE: {:2f} | Test MAE: {:2f} | R2: {:2f}'.format(rmse, mae, r2))
 
             # Non-scrambled data plot
-            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
-                     data=raw_data,
-                     time_start=plot_start, time_end=plot_end,
-                     adv_plot=False, savefig=savefig, xlabel=xlabel, ylabel=ylabel)
+            plt.plot(actual_y, label='Actual')
+            plt.plot(pred, label='Predicted')
+
+            plt.legend(loc='0', frameon=False)
+            plt.show()
 
             """
             Residual Analysis
@@ -462,8 +463,8 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
                         train_pred = linear_reg.test(features=train_x)
 
                         # Unnormalize data
-                        train_pred = min_max_normalization.unnormalize_y(train_pred)
-                        actual_y = min_max_normalization.unnormalize_y(train_y)
+                        train_pred = zscore_norm.unnormalize_y(train_pred)
+                        actual_y = zscore_norm.unnormalize_y(train_y)
 
                         # Evaluate error
                         train_rmse, train_mae = linear_reg.eval_loss(train_pred, actual_y)
@@ -471,8 +472,8 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
                         test_pred = linear_reg.test(features=test_x)
 
                         # Unnormalize data
-                        test_pred = min_max_normalization.unnormalize_y(test_pred)
-                        actual_y = min_max_normalization.unnormalize_y(test_y)
+                        test_pred = zscore_norm.unnormalize_y(test_pred)
+                        actual_y = zscore_norm.unnormalize_y(test_y)
 
                         test_rmse, test_mae = linear_reg.eval_loss(test_pred, actual_y)
 
@@ -486,27 +487,31 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             print("Model saved at: {}".format(model_path))
 
             # Save normalizer
-            save(min_max_normalization, norm_path)
+            save(zscore_norm, norm_path)
             print("Normalization saved at: {}".format(norm_path))
 
             # Final test
             pred = linear_reg.test(features=test_x)
 
+            plt.plot(test_y)
+            plt.show()
+
             # Unnormalize data
-            pred = min_max_normalization.unnormalize_y(pred)
-            actual_y = min_max_normalization.unnormalize_y(test_y)
+            pred = zscore_norm.unnormalize_y(pred)
+            actual_y = zscore_norm.unnormalize_y(test_y)
 
             test_rmse, test_mae = linear_reg.eval_loss(pred, actual_y)
             r2 = r_squared(pred, actual_y)
             print('Final Test Results:  Test RMSE: {:2f} | Test MAE: {:2f} | R2: {:2f}'.format(test_rmse, test_mae, r2))
 
-            weights_biases = linear_reg.weights_and_biases()
-
             # Non-scrambled data plot
-            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
-                     data=raw_data,
-                     time_start=plot_start, time_end=plot_end,
-                     adv_plot=False, savefig=savefig, xlabel=xlabel, ylabel=ylabel)
+            plt.plot(actual_y, label='Actual')
+            plt.plot(pred, label='Predicted')
+
+            plt.legend(loc='0', frameon=False)
+            plt.show()
+
+            weights_biases = linear_reg.weights_and_biases()
 
     return pred, actual_y, heading_names, linear_reg, weights_biases
 
@@ -518,7 +523,7 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/dynamic_data/' \
-                'diff_y_set1_train.csv'
+                'diff_y_set2_test.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
                  'dynamic_models/checkpoints/diff_y_set1.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
@@ -527,6 +532,6 @@ if __name__ == "__main__":
     Pred, Label, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path,
                                                                          lr=0.001, minibatch_size=8192,
                                                                          epochs=2500, lambd=0.001,
-                                                                         test_size=0.05,
+                                                                         test_size=0.999,
                                                                          shuffle=False, testing=True, loading=False,
                                                                          plot_start=2500, plot_end=4500, savefig=False)
