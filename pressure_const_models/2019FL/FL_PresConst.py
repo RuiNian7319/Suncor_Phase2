@@ -30,6 +30,7 @@ sys.path.insert(0, '/home/rui/Documents/Willowglen/Suncor_Phase2')
 from EWMA import ewma
 from Seq_plot import seq_pred
 from MinMaxNorm import MinMaxNormalization
+from Rsquared import r_squared
 
 warnings.filterwarnings('ignore')
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'
@@ -305,7 +306,7 @@ class LinearRegression:
 
 
 def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=2048,
-                epochs=30, lambd=0.001, testing=False, loading=False, plot_start=1, plot_end=5000):
+                epochs=30, lambd=0.001, testing=False, loading=False, plot_start=5000, plot_end=10000):
     """
     Description
        ---
@@ -402,8 +403,9 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
 
             # Evaluate loss
             rmse, mae = linear_reg.eval_loss(pred, test_y)
+            r2 = r_squared(pred, test_y)
 
-            print('Test RMSE: {:2f} | Test MAE: {:2f}'.format(rmse, mae))
+            print('Test RMSE: {:2f} | Test MAE: {:2f} | R2: {:2f}'.format(rmse, mae, r2))
 
             weights_biases = linear_reg.weights_and_biases()
 
@@ -411,7 +413,7 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
                      data=raw_data,
                      time_start=plot_start, time_end=plot_end,
-                     adv_plot=False)
+                     adv_plot=False, savefig=True)
 
         else:
 
@@ -489,7 +491,7 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
                      data=raw_data,
                      time_start=plot_start, time_end=plot_end,
-                     adv_plot=False)
+                     adv_plot=False, savefig=True)
 
     return raw_data, heading_names, linear_reg, weights_biases
 
@@ -508,7 +510,7 @@ if __name__ == "__main__":
                 '/normalization/ConstFL.pickle'
 
     Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path,
-                                                                      test_size=0.05, shuffle=True,
+                                                                      test_size=0.10, shuffle=False,
                                                                       lr=0.001, minibatch_size=8192,
-                                                                      epochs=2800, lambd=0.001,
-                                                                      testing=False, loading=False)
+                                                                      epochs=5800, lambd=0.001,
+                                                                      testing=True, loading=False)

@@ -1,2 +1,2 @@
-model_checkpoint_path: "/home/rui/Documents/Willowglen/Suncor_Phase2/dynamic_models/checkpoints/diff_y_set1_minmax.ckpt"
-all_model_checkpoint_paths: "/home/rui/Documents/Willowglen/Suncor_Phase2/dynamic_models/checkpoints/diff_y_set1_minmax.ckpt"
+model_checkpoint_path: "/home/rui/Documents/Willowglen/Suncor_Phase2/dynamic_models/checkpoints/y_set1_noNorm.ckpt"
+all_model_checkpoint_paths: "/home/rui/Documents/Willowglen/Suncor_Phase2/dynamic_models/checkpoints/y_set1_noNorm.ckpt"

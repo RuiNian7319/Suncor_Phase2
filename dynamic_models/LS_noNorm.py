@@ -29,7 +29,6 @@ sys.path.insert(0, '/home/rui/Documents/Willowglen/Suncor_Phase2')
 
 from EWMA import ewma
 from Seq_plot import seq_pred
-from MinMaxNorm import MinMaxNormalization
 from Rsquared import r_squared
 
 warnings.filterwarnings('ignore')
@@ -306,7 +305,8 @@ class LinearRegression:
 
 
 def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=2048,
-                epochs=30, lambd=0.001, testing=False, loading=False, plot_start=1, plot_end=5000):
+                epochs=30, lambd=0.001, testing=False, loading=False, plot_start=1, plot_end=5000, savefig=False,
+                xlabel='Time, t (mins)', ylabel='Flow rate, Q (bbl/h)'):
     """
     Description
        ---
@@ -359,23 +359,6 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
     train_y = train_y.reshape(-1, 1)
     test_y = test_y.reshape(-1, 1)
 
-    # Normalization
-    if testing:
-        min_max_normalization = load(norm_path)
-
-    else:
-        min_max_normalization = MinMaxNormalization(np.concatenate([train_y, train_x], axis=1))
-
-    training_data = min_max_normalization(np.concatenate([train_y, train_x], axis=1))
-    testing_data = min_max_normalization(np.concatenate([test_y, test_x], axis=1))
-
-    # Reshape for TensorFlow
-    train_x = training_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
-    test_x = testing_data[:, 1:].reshape(-1, raw_data.shape[1] - 1)
-
-    train_y = training_data[:, 0].reshape(-1, 1)
-    test_y = testing_data[:, 0].reshape(-1, 1)
-
     # Test cases for NaN values
     assert(not np.isnan(train_x).any())
     assert(not np.isnan(test_x).any())
@@ -397,22 +380,33 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             # Pred testing values
             pred = linear_reg.test(test_x)
 
-            # Unnormalize
-            pred = min_max_normalization.unnormalize_y(pred)
-            test_y = min_max_normalization.unnormalize_y(test_y)
-
             # Evaluate loss
             rmse, mae = linear_reg.eval_loss(pred, test_y)
+            r2 = r_squared(pred, test_y)
 
-            print('Test RMSE: {:2f} | Test MAE: {:2f}'.format(rmse, mae))
-
-            weights_biases = linear_reg.weights_and_biases()
+            print('Test RMSE: {:2f} | Test MAE: {:2f} | R2: {:2f}'.format(rmse, mae, r2))
 
             # Non-scrambled data plot
-            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
+            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=None,
                      data=raw_data,
                      time_start=plot_start, time_end=plot_end,
-                     adv_plot=False)
+                     adv_plot=False, savefig=savefig, xlabel=xlabel, ylabel=ylabel)
+
+            """
+            Residual Analysis
+            """
+            residuals = pred - test_y
+            print("Median residual: {}".format(np.median(residuals)))
+
+            # Auto correlation
+            plt.acorr(residuals[:, 0], maxlags=25)
+            plt.show()
+
+            # Cross correlation
+            plt.xcorr(pred[:, 0], test_y[:, 0], maxlags=25)
+            plt.show()
+
+            weights_biases = linear_reg.weights_and_biases()
 
         else:
 
@@ -444,22 +438,13 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
                     if i % 150 == 0:
                         current_loss = linear_reg.loss_check(features=train_x, labels=train_y)
 
+                        # Evaluate performance on training set
                         train_pred = linear_reg.test(features=train_x)
+                        train_rmse, train_mae = linear_reg.eval_loss(train_pred, train_y)
 
-                        # Unnormalize data
-                        train_pred = min_max_normalization.unnormalize_y(train_pred)
-                        actual_y = min_max_normalization.unnormalize_y(train_y)
-
-                        # Evaluate error
-                        train_rmse, train_mae = linear_reg.eval_loss(train_pred, actual_y)
-
+                        # Evaluate performance on testing set
                         test_pred = linear_reg.test(features=test_x)
-
-                        # Unnormalize data
-                        test_pred = min_max_normalization.unnormalize_y(test_pred)
-                        actual_y = min_max_normalization.unnormalize_y(test_y)
-
-                        test_rmse, test_mae = linear_reg.eval_loss(test_pred, actual_y)
+                        test_rmse, test_mae = linear_reg.eval_loss(test_pred, test_y)
 
                         print('Epoch: {} | Loss: {:2f} | Train RMSE: {:2f} | Test RMSE: {:2f}'.format(epoch,
                                                                                                       current_loss,
@@ -470,30 +455,22 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             linear_reg.saver.save(sess, model_path)
             print("Model saved at: {}".format(model_path))
 
-            # Save normalizer
-            save(min_max_normalization, norm_path)
-            print("Normalization saved at: {}".format(norm_path))
-
             # Final test
-            test_pred = linear_reg.test(features=test_x)
+            pred = linear_reg.test(features=test_x)
 
-            # Unnormalize data
-            test_pred = min_max_normalization.unnormalize_y(test_pred)
-            actual_y = min_max_normalization.unnormalize_y(test_y)
-
-            test_rmse, test_mae = linear_reg.eval_loss(test_pred, actual_y)
-            R2 = r_squared(test_pred, actual_y)
-            print('Final Test Results:  Test RMSE: {:2f} | Test MAE: {:2f} | R2: {:2f}'.format(test_rmse, test_mae, R2))
+            test_rmse, test_mae = linear_reg.eval_loss(pred, test_y)
+            r2 = r_squared(pred, test_y)
+            print('Final Test Results:  Test RMSE: {:2f} | Test MAE: {:2f} | R2: {:2f}'.format(test_rmse, test_mae, r2))
 
             weights_biases = linear_reg.weights_and_biases()
 
             # Non-scrambled data plot
-            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=min_max_normalization,
+            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=None,
                      data=raw_data,
                      time_start=plot_start, time_end=plot_end,
-                     adv_plot=False)
+                     adv_plot=False, savefig=savefig, xlabel=xlabel, ylabel=ylabel)
 
-    return raw_data, heading_names, linear_reg, weights_biases
+    return pred, test_y, heading_names, linear_reg, weights_biases
 
 
 if __name__ == "__main__":
@@ -502,15 +479,16 @@ if __name__ == "__main__":
     random_seed(42)
 
     # Specify data, model and normalization paths
-    Data_path = '/home/rui/Documents/Willowglen/data/2019PresConstr_Data/' \
-                '2019Chey_Pres.csv'
-    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_const_models/2019Chey' \
-                 '/checkpoints/ConstChey.ckpt'
-    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_const_models/2019Chey' \
-                '/normalization/ConstChey.pickle'
+    Data_path = '/home/rui/Documents/Willowglen/data/dynamic_data/' \
+                'y_set1_test.csv'
+    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
+                 'dynamic_models/checkpoints/y_set1_noNorm.ckpt'
+    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
+                'dynamic_models/normalization/y_set1_noNorm.pickle'
 
-    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path,
-                                                                      test_size=0.05, shuffle=True,
-                                                                      lr=0.001, minibatch_size=8192,
-                                                                      epochs=1, lambd=0.001,
-                                                                      testing=False, loading=True)
+    Pred, Label, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path,
+                                                                         lr=0.001, minibatch_size=8192,
+                                                                         epochs=1, lambd=0.001,
+                                                                         test_size=0.05,
+                                                                         shuffle=True, testing=True, loading=False,
+                                                                         plot_start=0, plot_end=2000, savefig=False)

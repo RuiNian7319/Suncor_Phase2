@@ -12,7 +12,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-def seq_pred(session, model, features, data, normalizer, time_start, time_end, xlabel='Time', ylabel='Flow Rate',
+def seq_pred(session, model, features, data, normalizer, time_start, time_end, xlabel='Time, t (s)', ylabel='Flow Rate, Q (bbl/h)',
              adv_plot=True, savefig=False):
     """
     Description

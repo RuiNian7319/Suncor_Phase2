@@ -60,8 +60,6 @@ Test R2: 0.89
 **Residuals are always positively biased**
 
 
-
-
 Difference Models:
 
 Set 1 - Zscore norm and min max.
