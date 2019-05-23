@@ -474,14 +474,14 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/2019PresConstr_Data/' \
-                '2019Chey_Pres.csv'
+                'PresMay2019.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_const_models/2019Chey' \
-                 '/checkpoints/ConstChey.ckpt'
+                 '/checkpoints/NoConstChey.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_const_models/2019Chey' \
-                '/normalization/ConstChey.pickle'
+                '/normalization/NoConstChey.pickle'
 
     Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path,
-                                                                      test_size=0.99, shuffle=False,
-                                                                      lr=0.001, minibatch_size=8192,
-                                                                      epochs=8000, lambd=0.001,
-                                                                      testing=True, loading=True)
+                                                                      test_size=0.05, shuffle=True,
+                                                                      lr=0.001, minibatch_size=512,
+                                                                      epochs=1000, lambd=0.001,
+                                                                      testing=False, loading=False)
