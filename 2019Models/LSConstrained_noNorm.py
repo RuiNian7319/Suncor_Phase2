@@ -396,8 +396,6 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             se = standard_error(pred, test_y)
             r2 = r_squared(pred, test_y)
 
-            plt.rcParams['figure.figsize'] = [24, 10]
-
             plt.plot(pred[:], label='Predicted')
             plt.plot(test_y[:], label='Test Data')
 
@@ -476,6 +474,16 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             se = standard_error(test_pred, test_y)
             r2 = r_squared(test_pred, test_y)
 
+            plt.plot(test_pred[:], label='Predicted')
+            plt.plot(test_y[:], label='Test Data')
+
+            plt.xlabel('Time')
+            plt.ylabel('Flow rate (bbl/h)')
+
+            plt.legend(loc='0', frameon=False)
+
+            plt.show()
+
             print('Final Test Results:  Test RMSE: {:2f} | Test MAE: {:2f} | SE: {:2f} | R2: {:2f}'.format(test_rmse,
                                                                                                            test_mae,
                                                                                                            se,
@@ -493,13 +501,13 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
-                'May2019.csv'
+                'New_data.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/ls2019_noNorm.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/normalization/ls2019_noNorm.pickle'
 
     Raw_data, Heading, Model, Const_par, Uncon_Par, Bias = train_model(Data_path, Model_path, Norm_path,
-                                                                       train_size=0.95, test_size=0.05, shuffle=False,
+                                                                       train_size=0.95, test_size=0.05, shuffle=True,
                                                                        lr=0.001, minibatch_size=512,
                                                                        epochs=1000, lambd=0.001,
-                                                                       testing=False, loading=False,
+                                                                       testing=False, loading=True,
                                                                        num_of_const=10)
