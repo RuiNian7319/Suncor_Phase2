@@ -422,15 +422,10 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             plt.plot(pred[-11000:], label='Predictions')
             plt.plot(test_y[-11000:], label='Actual')
 
-            plt.plot(test_x[-11000:, 8])
-
             plt.xlabel('Time (min)')
             plt.ylabel('Normalized Flow Rate (bbl/h)')
 
             plt.legend(loc='0', frameon=None)
-            plt.show()
-
-            plt.plot(test_x[-11000:, 8])
             plt.show()
 
             weights_biases = linear_reg.weights_and_biases()
@@ -543,9 +538,9 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
-                'new_model_train.csv'
-    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/ls2019.ckpt'
-    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/normalization/ls2019.pickle'
+                'pres_test.csv'
+    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/ls2019_pres.ckpt'
+    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/normalization/ls2019_pres.pickle'
 
     Heading_names, Weights_biases = train_model(Data_path, Model_path, Norm_path,
                                                 train_size=0.001, test_size=0.999, shuffle=False,

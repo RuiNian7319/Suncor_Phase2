@@ -501,13 +501,13 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
-                'New_data.csv'
+                'May2019.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/ls2019_noNorm.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/normalization/ls2019_noNorm.pickle'
 
     Raw_data, Heading, Model, Const_par, Uncon_Par, Bias = train_model(Data_path, Model_path, Norm_path,
-                                                                       train_size=0.95, test_size=0.05, shuffle=True,
-                                                                       lr=0.001, minibatch_size=512,
-                                                                       epochs=1000, lambd=0.001,
-                                                                       testing=False, loading=True,
+                                                                       train_size=0.001, test_size=0.999, shuffle=False,
+                                                                       lr=0.001, minibatch_size=2048,
+                                                                       epochs=10000, lambd=0.001,
+                                                                       testing=True, loading=True,
                                                                        num_of_const=10)
