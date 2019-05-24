@@ -1,2 +1,2 @@
-model_checkpoint_path: "/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_current_models/2019/checkpoints/FL_noNorm.ckpt"
-all_model_checkpoint_paths: "/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_current_models/2019/checkpoints/FL_noNorm.ckpt"
+model_checkpoint_path: "/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_current_models/2019/checkpoints/Chey_noNorm.ckpt"
+all_model_checkpoint_paths: "/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_current_models/2019/checkpoints/Chey_noNorm.ckpt"

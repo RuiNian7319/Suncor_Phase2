@@ -56,3 +56,37 @@ RMSE: 75
 MAE: 54
 
 
+# Pressure instead of Current Models
+1. Build models using pressure instead of current
+
+2019 Train data
+RMSE: 97
+MAE: 75
+
+2019 May data
+RMSE: 152
+MAE: 120
+
+2. Build model for the train and test splits
+
+Training data
+RMSE: 102
+MAE: 75
+
+Test data
+RMSE: 84
+MAE: 62
+
+
+# Current2Pressure Models
+1. Build current to pressure models
+
+2019 Train data
+RMSE: 72
+MAE: 56
+
+2019 May data
+RMSE: 47
+MAE: 39
+
+

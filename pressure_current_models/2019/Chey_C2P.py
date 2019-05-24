@@ -305,7 +305,7 @@ class LinearRegression:
 
 
 def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, lr=0.003, minibatch_size=2048,
-                epochs=30, lambd=0.001, testing=False, loading=False, plot_start=1, plot_end=5000):
+                epochs=30, lambd=0.001, testing=False, loading=False, plot_start=2000, plot_end=6000):
     """
     Description
        ---
@@ -501,14 +501,14 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/2019Cur2Pres/' \
-                '2019CheyVFD.csv'
+                '2019MayVFD.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_current_models/2019' \
                  '/checkpoints/Chey.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_current_models/2019' \
                 '/normalization/Chey.pickle'
 
     Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path,
-                                                                      test_size=0.05, shuffle=True,
-                                                                      lr=0.001, minibatch_size=8192,
-                                                                      epochs=2800, lambd=0.001,
+                                                                      test_size=0.999, shuffle=False,
+                                                                      lr=0.001, minibatch_size=2048,
+                                                                      epochs=800, lambd=0.001,
                                                                       testing=False, loading=False)
