@@ -417,13 +417,20 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
 
             print('Test RMSE: {:2f} | Test MAE: {:2f} | SE: {:2f} | R2: {:2f}'.format(rmse, mae, se, r2))
 
-            plt.plot(pred[:-1], label='Predictions')
-            plt.plot(test_y[:-1], label='Actual')
+            plt.rcParams['figure.figsize'] = [25, 10]
+
+            plt.plot(pred[-11000:], label='Predictions')
+            plt.plot(test_y[-11000:], label='Actual')
+
+            plt.plot(test_x[-11000:, 8])
 
             plt.xlabel('Time (min)')
             plt.ylabel('Normalized Flow Rate (bbl/h)')
 
             plt.legend(loc='0', frameon=None)
+            plt.show()
+
+            plt.plot(test_x[-11000:, 8])
             plt.show()
 
             weights_biases = linear_reg.weights_and_biases()
@@ -509,6 +516,16 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             se = standard_error(test_pred, actual_y)
             r2 = r_squared(test_pred, actual_y)
 
+            plt.plot(test_pred[:], label='Predicted')
+            plt.plot(actual_y[:], label='Test Data')
+
+            plt.xlabel('Time')
+            plt.ylabel('Flow rate (bbl/h)')
+
+            plt.legend(loc='0', frameon=False)
+
+            plt.show()
+
             print('Final Test Results:  Test RMSE: {:2f} | Test MAE: {:2f} | SE: {:2f} | R2: {:2f}'.format(test_rmse,
                                                                                                            test_mae,
                                                                                                            se,
@@ -526,12 +543,12 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
-                'New_data.csv'
+                'new_model_train.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/ls2019.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/normalization/ls2019.pickle'
 
     Heading_names, Weights_biases = train_model(Data_path, Model_path, Norm_path,
-                                                train_size=0.95, test_size=0.05, shuffle=True,
-                                                lr=0.001, minibatch_size=2048, epochs=700, lambd=0.001,
-                                                testing=False, loading=False,
+                                                train_size=0.001, test_size=0.999, shuffle=False,
+                                                lr=0.001, minibatch_size=2048, epochs=800, lambd=0.001,
+                                                testing=True, loading=False,
                                                 num_of_const=10)
