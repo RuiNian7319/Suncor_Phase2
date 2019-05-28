@@ -391,10 +391,12 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             weights_biases = linear_reg.weights_and_biases()
 
             # Non-scrambled data plot
-            seq_pred(session=sess, model=linear_reg.z, features=linear_reg.X, normalizer=None,
-                     data=raw_data,
-                     time_start=plot_start, time_end=plot_end,
-                     adv_plot=False)
+            plt.plot(pred, label='Predicted')
+            plt.plot(test_y, label='Actual')
+
+            plt.legend(frameon=False)
+
+            plt.show()
 
         else:
 
@@ -474,14 +476,14 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/2019Cur2Pres/' \
-                '2019Cur2Pres.csv'
+                '2019May22VFD.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_current_models/2019' \
                  '/checkpoints/Chey_noNorm.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_current_models/2019' \
                 '/normalization/Chey_noNorm.pickle'
 
     Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path,
-                                                                      test_size=0.05, shuffle=False,
+                                                                      test_size=0.999, shuffle=False,
                                                                       lr=0.001, minibatch_size=8192,
                                                                       epochs=10000, lambd=0.005,
                                                                       testing=True, loading=False)
