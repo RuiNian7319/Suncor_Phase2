@@ -501,14 +501,14 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/2019Cur2Pres/' \
-                '2019MayVFD.csv'
+                'sour_train.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_current_models/2019' \
-                 '/checkpoints/Chey.ckpt'
+                 '/checkpoints/sour_train.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_current_models/2019' \
-                '/normalization/Chey.pickle'
+                '/normalization/sour_train.pickle'
 
     Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path,
-                                                                      test_size=0.999, shuffle=False,
+                                                                      test_size=0.01, shuffle=True,
                                                                       lr=0.001, minibatch_size=2048,
                                                                       epochs=800, lambd=0.001,
                                                                       testing=False, loading=False)

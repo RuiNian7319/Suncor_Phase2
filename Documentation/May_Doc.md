@@ -89,4 +89,24 @@ MAE: 56
 RMSE: 47
 MAE: 39
 
+# Current2Pressure Models split
 
+**Sweet data**
+
+2019 Train data
+RMSE: 65
+MAE: 46
+
+2019 Test data
+RMSE:
+MAE:
+
+**Sour data**
+
+2019 Train data
+RMSE: 63
+MAE: 49
+
+2019 Test data
+RMSE:
+MAE:

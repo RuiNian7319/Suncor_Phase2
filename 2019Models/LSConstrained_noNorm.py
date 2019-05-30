@@ -453,7 +453,7 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
                         train_rmse, train_mae = linear_reg.eval_loss(train_pred, train_y)
 
                         test_pred = linear_reg.test(const_features=test_x[:, :num_of_const],
-                                                    unconst_features=t   est_x[:, linear_reg.nx_Cons:])
+                                                    unconst_features=test_x[:, linear_reg.nx_Cons:])
 
                         test_rmse, test_mae = linear_reg.eval_loss(test_pred, test_y)
 
