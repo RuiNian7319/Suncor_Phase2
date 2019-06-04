@@ -98,8 +98,8 @@ RMSE: 65
 MAE: 46
 
 2019 Test data
-RMSE:
-MAE:
+RMSE: Good after intercept correction
+MAE: Good after intercept correction
 
 **Sour data**
 
@@ -108,5 +108,23 @@ RMSE: 63
 MAE: 49
 
 2019 Test data
-RMSE:
-MAE:
+RMSE: Good after intercept correction
+MAE: Good after intercept correction
+
+# Current2Pressure Ault pump split
+
+Good sweet:
+RMSE: 138
+MAE: 116
+
+Bad sweet:
+RMSE: 174
+MAE: 165
+
+Good sour:
+RMSE: 86
+MAE: 71
+
+Bad sour:
+RMSE: 172
+MAE: 167

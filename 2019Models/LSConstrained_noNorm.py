@@ -396,8 +396,8 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
             se = standard_error(pred, test_y)
             r2 = r_squared(pred, test_y)
 
-            plt.plot(pred[0:5000], label='Predicted')
-            plt.plot(test_y[0:5000], label='Test Data')
+            plt.plot(pred, label='Predicted')
+            plt.plot(test_y, label='Test Data')
 
             plt.xlabel('Time')
             plt.ylabel('Flow rate (bbl/h)')
@@ -501,12 +501,12 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
-                'May22_data.csv'
+                'May22_Jun3Data.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/ls2019_noNorm.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/normalization/ls2019_noNorm.pickle'
 
     Raw_data, Heading, Model, Const_par, Uncon_Par, Bias = train_model(Data_path, Model_path, Norm_path,
-                                                                       train_size=0.001, test_size=0.999, shuffle=False,
+                                                                       train_size=0.01, test_size=0.99, shuffle=False,
                                                                        lr=0.001, minibatch_size=2048,
                                                                        epochs=10000, lambd=0.001,
                                                                        testing=True, loading=False,
