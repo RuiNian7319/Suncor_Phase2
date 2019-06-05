@@ -26,6 +26,7 @@ import warnings
 
 import sys
 sys.path.insert(0, '/home/rui/Documents/Willowglen/Suncor_Phase2')
+sys.path.insert(0, '/Users/ruinian/Documents/Willowglen/Suncor_Phase2')
 
 from EWMA import ewma
 from Seq_plot import seq_pred
@@ -499,16 +500,24 @@ if __name__ == "__main__":
     # Seed NumPy and TensorFlow with the meaning of life
     random_seed(42)
 
-    # Specify data, model and normalization paths
-    Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
-                'subset_data.csv'
-    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                 'linear_regression_models/Objects/checkpoints/lsFL.ckpt'
-    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
-                'linear_regression_models/Objects/normalization/lsFL.pickle'
+    # iOS data, model and normalization paths
+    Data_path = '/Users/ruinian/Documents/Willowglen/data/2019Optimization_Data/' \
+                'May22_Jun3Data_noTemp.csv'
+    Model_path = '/Users/ruinian/Documents/Willowglen/Suncor_Phase2/' \
+                 'linear_regression_models/Objects/checkpoints/noTemp.ckpt'
+    Norm_path = '/Users/ruinian/Documents/Willowglen/Suncor_Phase2/' \
+                'linear_regression_models/Objects/normalization/noTemp.pickle'
 
-    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
+    # Ubuntu data, model and normalization paths
+    # Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
+    #             'AllData.csv'
+    # Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
+    #              'linear_regression_models/Objects/checkpoints/lsFL.ckpt'
+    # Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
+    #             'linear_regression_models/Objects/normalization/lsFL.pickle'
+
+    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.999,
                                                                       shuffle=True, lr=0.001, minibatch_size=2048,
                                                                       epochs=900, lambd=0.001,
-                                                                      testing=False, loading=False,
-                                                                      plot_start=5000, plot_end=6000)
+                                                                      testing=True, loading=False,
+                                                                      plot_start=0, plot_end=11000)

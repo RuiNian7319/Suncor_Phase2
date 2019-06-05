@@ -26,8 +26,8 @@ import pickle
 import warnings
 
 import sys
-
 sys.path.insert(0, '/home/rui/Documents/Willowglen/Suncor_Phase2')
+sys.path.insert(0, '/Users/ruinian/Documents/Willowglen/Suncor_Phase2')
 
 from EWMA import ewma
 from Seq_plot import seq_pred
@@ -532,23 +532,26 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
 
 if __name__ == "__main__":
 
-    start = time.time()
-
     # Seed NumPy and TensorFlow with the meaning of life
     random_seed(42)
 
-    # Specify data, model and normalization paths
-    Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
-                '2019AllData.csv'
-    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models' \
-                 '/checkpoints/nn2019.ckpt'
-    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models' \
-                '/normalization/nn2019.pickle'
+    # iOS data, model and normalization paths
+    Data_path = '/Users/ruinian/Documents/Willowglen/data/2019Optimization_Data/' \
+                'May22_Jun3Data_noTemp.csv'
+    Model_path = '/Users/ruinian/Documents/Willowglen/Suncor_Phase2/' \
+                 'linear_regression_models/Objects/checkpoints/noTemp.ckpt'
+    Norm_path = '/Users/ruinian/Documents/Willowglen/Suncor_Phase2/' \
+                'linear_regression_models/Objects/normalization/noTemp.pickle'
 
-    Raw_data, Heading_names, NN = train_model(Data_path, Model_path, Norm_path, test_size=0.01,
-                                              shuffle=True, lr=0.001, minibatch_size=8192,
-                                              epochs=1000, lambd=0.001,
-                                              testing=False, loading=True)
+    # Ubuntu data, model and normalization paths
+    # Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
+    #             'AllData.csv'
+    # Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
+    #              'linear_regression_models/Objects/checkpoints/lsFL.ckpt'
+    # Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
+    #             'linear_regression_models/Objects/normalization/lsFL.pickle'
 
-    end = time.time()
-    print('Total simulation time: {}'.format(end - start))
+    Raw_data, Heading_names, NN = train_model(Data_path, Model_path, Norm_path, test_size=0.999999,
+                                              shuffle=False, lr=0.001, minibatch_size=2048,
+                                              epochs=200, lambd=0.001,
+                                              testing=True, loading=True)
