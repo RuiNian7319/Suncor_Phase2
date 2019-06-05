@@ -476,11 +476,11 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/2019Cur2Pres/' \
-                'May22_Jun3Sour.csv'
+                'May22_Jun3Sweet.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_current_models/2019' \
-                 '/checkpoints/Sour_noNorm.ckpt'
+                 '/checkpoints/Sweet_noNorm.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_current_models/2019' \
-                '/normalization/Sour_noNorm.pickle'
+                '/normalization/Sweet_noNorm.pickle'
 
     Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path,
                                                                       test_size=0.35, shuffle=False,
