@@ -501,7 +501,7 @@ if __name__ == "__main__":
 
     # Specify data, model and normalization paths
     Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
-                'Set_DecJuneData_deMeaned.csv'
+                'Set_DecJuneData.csv'
     Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/test1.ckpt'
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/normalization/test1.pickle'
 
