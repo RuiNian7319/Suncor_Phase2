@@ -1,2 +1,2 @@
-model_checkpoint_path: "/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_current_models/2019/checkpoints/Sweet_noNorm.ckpt"
-all_model_checkpoint_paths: "/home/rui/Documents/Willowglen/Suncor_Phase2/pressure_current_models/2019/checkpoints/Sweet_noNorm.ckpt"
+model_checkpoint_path: "/Users/ruinian/Documents/Willowglen/Suncor_Phase2/pressure_current_models/2019/checkpoints/sour_train_nn.ckpt"
+all_model_checkpoint_paths: "/Users/ruinian/Documents/Willowglen/Suncor_Phase2/pressure_current_models/2019/checkpoints/sour_train_nn.ckpt"
