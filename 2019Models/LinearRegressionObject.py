@@ -492,7 +492,7 @@ def train_model(data_path, model_path, norm_path, test_size=0.05, shuffle=True, 
                      time_start=plot_start, time_end=plot_end,
                      adv_plot=False)
 
-    return raw_data, heading_names, linear_reg, weights_biases
+    return raw_data, heading_names, linear_reg, weights_biases, min_max_normalization
 
 
 if __name__ == "__main__":
@@ -502,7 +502,7 @@ if __name__ == "__main__":
 
     # iOS data, model and normalization paths
     Data_path = '/Users/ruinian/Documents/Willowglen/data/2019Optimization_Data/' \
-                'Set_DecJuneData.csv'
+                'pump_data_filtered.csv'
     Model_path = '/Users/ruinian/Documents/Willowglen/Suncor_Phase2/' \
                  'linear_regression_models/Objects/checkpoints/test.ckpt'
     Norm_path = '/Users/ruinian/Documents/Willowglen/Suncor_Phase2/' \
@@ -516,8 +516,8 @@ if __name__ == "__main__":
     # Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
     #             'linear_regression_models/Objects/normalization/test.pickle'
 
-    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.1,
-                                                                      shuffle=False, lr=0.001, minibatch_size=512,
-                                                                      epochs=900, lambd=0.001,
-                                                                      testing=True, loading=False,
+    Raw_data, Heading_names, Linear_reg, Weights_biases, norm = train_model(Data_path, Model_path, Norm_path, test_size=0.05,
+                                                                      shuffle=True, lr=0.001, minibatch_size=64,
+                                                                      epochs=300, lambd=0.001,
+                                                                      testing=False, loading=False,
                                                                       plot_start=0, plot_end=6000)

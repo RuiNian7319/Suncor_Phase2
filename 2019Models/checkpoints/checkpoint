@@ -1,2 +1,2 @@
-model_checkpoint_path: "/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/test1.ckpt"
-all_model_checkpoint_paths: "/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/test1.ckpt"
+model_checkpoint_path: "/Users/ruinian/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/test.ckpt"
+all_model_checkpoint_paths: "/Users/ruinian/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/test.ckpt"
