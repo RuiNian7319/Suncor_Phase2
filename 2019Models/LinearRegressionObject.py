@@ -501,23 +501,23 @@ if __name__ == "__main__":
     random_seed(42)
 
     # iOS data, model and normalization paths
-    Data_path = '/Users/ruinian/Documents/Willowglen/data/2019Optimization_Data/' \
-                'Set_DecJuneData.csv'
-    Model_path = '/Users/ruinian/Documents/Willowglen/Suncor_Phase2/' \
-                 'linear_regression_models/Objects/checkpoints/test.ckpt'
-    Norm_path = '/Users/ruinian/Documents/Willowglen/Suncor_Phase2/' \
-                'linear_regression_models/Objects/normalization/test.pickle'
-
-    # Ubuntu data, model and normalization paths
-    # Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
-    #             'May22_Jun3Data.csv'
-    # Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
+    # Data_path = '/Users/ruinian/Documents/Willowglen/data/2019Optimization_Data/' \
+    #             'Set_DecJuneData2.csv'
+    # Model_path = '/Users/ruinian/Documents/Willowglen/Suncor_Phase2/' \
     #              'linear_regression_models/Objects/checkpoints/test.ckpt'
-    # Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
+    # Norm_path = '/Users/ruinian/Documents/Willowglen/Suncor_Phase2/' \
     #             'linear_regression_models/Objects/normalization/test.pickle'
 
-    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.1,
-                                                                      shuffle=False, lr=0.001, minibatch_size=512,
+    # Ubuntu data, model and normalization paths
+    Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
+                'Set_DecJuneData2.csv'
+    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
+                 'linear_regression_models/Objects/checkpoints/test.ckpt'
+    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
+                'linear_regression_models/Objects/normalization/test.pickle'
+
+    Raw_data, Heading_names, Linear_reg, Weights_biases = train_model(Data_path, Model_path, Norm_path, test_size=0.01,
+                                                                      shuffle=True, lr=0.001, minibatch_size=512,
                                                                       epochs=900, lambd=0.001,
-                                                                      testing=True, loading=False,
+                                                                      testing=False, loading=False,
                                                                       plot_start=0, plot_end=6000)
