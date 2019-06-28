@@ -506,7 +506,7 @@ if __name__ == "__main__":
     Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/normalization/sqrt_model.pickle'
 
     Raw_data, Heading, Model, Const_par, Uncon_Par, Bias = train_model(Data_path, Model_path, Norm_path,
-                                                                       train_size=0.95, test_size=0.1, shuffle=False,
+                                                                       train_size=0.95, test_size=0.05, shuffle=False,
                                                                        lr=0.001, minibatch_size=2048,
                                                                        epochs=10000, lambd=0.001,
                                                                        testing=True, loading=False,

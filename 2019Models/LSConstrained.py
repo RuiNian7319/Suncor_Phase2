@@ -26,6 +26,7 @@ import warnings
 
 import sys
 sys.path.insert(0, '/home/rui/Documents/Willowglen/Suncor_Phase2')
+sys.path.insert(0, '/Users/ruinian/Documents/Willowglen/Suncor_Phase2')
 
 from EWMA import ewma
 from Seq_plot import seq_pred
@@ -537,13 +538,19 @@ if __name__ == "__main__":
     random_seed(42)
 
     # Specify data, model and normalization paths
-    Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
-                'pres_test.csv'
-    Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/ls2019_pres.ckpt'
-    Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/normalization/ls2019_pres.pickle'
+    # Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
+    #             'Set_DecJuneData.csv'
+    # Model_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/test.ckpt'
+    # Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/normalization/test.pickle'
+
+    # Specify data, model and normalization paths
+    Data_path = '/Users/ruinian/Documents/Willowglen/data/2019Optimization_Data/' \
+                'Set_DecJuneData_sqrt.csv'
+    Model_path = '/Users/ruinian/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/test.ckpt'
+    Norm_path = '/Users/ruinian/Documents/Willowglen/Suncor_Phase2/2019Models/normalization/test.pickle'
 
     Heading_names, Weights_biases = train_model(Data_path, Model_path, Norm_path,
-                                                train_size=0.001, test_size=0.999, shuffle=False,
+                                                train_size=0.995, test_size=0.005, shuffle=True,
                                                 lr=0.001, minibatch_size=2048, epochs=800, lambd=0.001,
-                                                testing=True, loading=False,
+                                                testing=False, loading=False,
                                                 num_of_const=10)

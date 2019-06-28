@@ -1,2 +1,7 @@
+<<<<<<< HEAD
 model_checkpoint_path: "/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/sqrt_model.ckpt"
 all_model_checkpoint_paths: "/home/rui/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/sqrt_model.ckpt"
+=======
+model_checkpoint_path: "/Users/ruinian/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/test.ckpt"
+all_model_checkpoint_paths: "/Users/ruinian/Documents/Willowglen/Suncor_Phase2/2019Models/checkpoints/test.ckpt"
+>>>>>>> 36b0985841b52777f985072db129fc38d26ac931

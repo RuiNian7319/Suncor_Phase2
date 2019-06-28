@@ -537,11 +537,11 @@ if __name__ == "__main__":
 
     # iOS data, model and normalization paths
     Data_path = '/Users/ruinian/Documents/Willowglen/data/2019Optimization_Data/' \
-                'May22_Jun3Data_noTemp.csv'
+                'pump_data_filtered.csv'
     Model_path = '/Users/ruinian/Documents/Willowglen/Suncor_Phase2/' \
-                 'linear_regression_models/Objects/checkpoints/noTemp.ckpt'
+                 'linear_regression_models/Objects/checkpoints/test.ckpt'
     Norm_path = '/Users/ruinian/Documents/Willowglen/Suncor_Phase2/' \
-                'linear_regression_models/Objects/normalization/noTemp.pickle'
+                'linear_regression_models/Objects/normalization/test.pickle'
 
     # Ubuntu data, model and normalization paths
     # Data_path = '/home/rui/Documents/Willowglen/data/2019Optimization_Data/' \
@@ -551,7 +551,7 @@ if __name__ == "__main__":
     # Norm_path = '/home/rui/Documents/Willowglen/Suncor_Phase2/' \
     #             'linear_regression_models/Objects/normalization/lsFL.pickle'
 
-    Raw_data, Heading_names, NN = train_model(Data_path, Model_path, Norm_path, test_size=0.999999,
-                                              shuffle=False, lr=0.001, minibatch_size=2048,
-                                              epochs=200, lambd=0.001,
+    Raw_data, Heading_names, NN = train_model(Data_path, Model_path, Norm_path, test_size=0.99,
+                                              shuffle=False, lr=0.001, minibatch_size=128,
+                                              epochs=500, lambd=0.001,
                                               testing=True, loading=True)
